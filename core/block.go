@@ -1,6 +1,9 @@
 package core
 
-import "main/config"
+import (
+	"main/config"
+	"time"
+)
 
 /**
  * Created by @CaomaoBoy on 2021/5/1.
@@ -8,22 +11,22 @@ import "main/config"
  */
 
 type Block struct {
-	Index int `json:"index"`
-	PreviousHash string `json:"previous_hash"`
+	Index int64 `json:"index"`
+	PreviousHash []byte `json:"previous_hash"`
 	Memorials  []*Memorial `json:"memorial"`
 	TimeStamp int64 `json:"time_stamp"`
-	Data string `json:"data"`
-	Hash int64 `json:"hash"`
+	Data []byte `json:"data"`
+	Nonce int64 `json:"nonce"`
 	Version string `json:"version"`
+	Hash []byte `json:"hash"`
 }
 
-func NewBlock() *Block{
+func NewBlock(index int,prevHash []byte,data []byte) *Block{
 	return &Block{
-		Index:        0,
-		PreviousHash: "",
-		TimeStamp:    0,
-		Data:         "",
-		Hash:         0,
+		Index:        int64(index),
+		PreviousHash: prevHash,
+		TimeStamp:    time.Now().UnixNano(),
+		Data:         data,
 		Version:      config.Version,
 	}
 }
@@ -32,10 +35,11 @@ func NewBlock() *Block{
 func CreateGenesisBlock() *Block{
 	return &Block{
 		Index:        1,
-		PreviousHash: "",
+		PreviousHash: []byte{},
 		TimeStamp:    0,
-		Data:         "it's my time to create word!",
-		Hash:         0,
+		Data:         []byte("it's my time to create word!"),
+		Hash:         []byte(""),
 		Version:      config.Version,
 	}
 }
+
