@@ -15,4 +15,7 @@ const (
 	DbName = "BlockData"
 	BlockInfo = "BF"
 	BlockInfo_Size = "index"
+
+
+	RewardCoinn = 7
 )

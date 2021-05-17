@@ -1,6 +1,10 @@
 package main
 
-import "main/core"
+import (
+	"crypto/rand"
+	"fmt"
+	"main/wallet"
+)
 
 /**
  * Created by @CaomaoBoy on 2021/5/16.
@@ -8,6 +12,13 @@ import "main/core"
  */
 
 func main(){
-	core.Mining()
+	keys := wallet.GetBitcoinKeys()
+	bitcoinAddress := keys.GetAddress()
+	fmt.Println("TulipCoin Address:", string(bitcoinAddress))
+	fmt.Printf("Verify TulipCoin Address:%v\n", wallet.IsVaildBitcoinAddress(string(bitcoinAddress)))
+	fmt.Printf("%s\n",keys.GetPrivateKey())
+	//core.Mining()
+	dax ,_ := keys.PrivateKey.Sign(rand.Reader,[]byte("xxxx"),nil)
+	fmt.Println(dax)
 
 }

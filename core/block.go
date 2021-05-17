@@ -15,7 +15,7 @@ type Block struct {
 	PreviousHash []byte `json:"previous_hash"`
 	Memorials  []*Memorial `json:"memorial"`
 	TimeStamp int64 `json:"time_stamp"`
-	Data []byte `json:"data"`
+	Transactions []*Transaction `json:"transactions"`
 	Nonce int64 `json:"nonce"`
 	Version string `json:"version"`
 	Hash []byte `json:"hash"`
@@ -26,7 +26,7 @@ func NewBlock(index int,prevHash []byte,data []byte) *Block{
 		Index:        int64(index),
 		PreviousHash: prevHash,
 		TimeStamp:    time.Now().UnixNano(),
-		Data:         data,
+		Transactions:  make([]*Transaction,0),
 		Version:      config.Version,
 	}
 }
@@ -37,7 +37,7 @@ func CreateGenesisBlock() *Block{
 		Index:        1,
 		PreviousHash: []byte{},
 		TimeStamp:    0,
-		Data:         []byte("it's my time to create word!"),
+		Transactions: make([]*Transaction,0),
 		Hash:         []byte(""),
 		Version:      config.Version,
 	}

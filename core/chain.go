@@ -39,7 +39,6 @@ func init(){
 	_BlockChain.BlockChainDB = blockChainDB
 	genesisBlock := CreateGenesisBlock()
 	_BlockChain.Blocks[0] = genesisBlock
-
 	res ,err := blockChainDB.Select(config.DbName)
 	if err != nil{
 		panic(err)
@@ -89,7 +88,6 @@ func ShowBlockChainInfo(bc *BlocksChain){
 		fmt.Printf("Block  Hash : %x\n",block.Hash)
 		fmt.Printf("Block  Nonce : %d\n",block.Nonce)
 		fmt.Printf("Prev Block Hash : %x\n",block.PreviousHash)
-		fmt.Printf("Block Data : %s\n",block.Data)
 		fmt.Printf("Block TimeStamp : %d\n",block.TimeStamp)
 		fmt.Printf("==================\n")
 	}
