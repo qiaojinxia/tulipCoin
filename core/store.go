@@ -12,7 +12,7 @@ import (
 	"main/utils"
 	"strconv"
 )
-//BlotDB的管理类
+//BlotDB
 type BlockChainDB struct {
 	db *bolt.DB //db
 }

@@ -34,7 +34,6 @@ func GetBitcoinKeys() *BitcoinKeys {
 	return b
 }
 
-
 //Elliptic curve generate  PublicKey
 func (b *BitcoinKeys) newKeyPair(){
 	curve := elliptic.P256()
@@ -98,7 +97,6 @@ func IsVaildBitcoinAddress(address string) bool {
 	}
 }
 
-
 func(b *BitcoinKeys) Sign(data []byte) (string, error) {
 	r, s, err := ecdsa.Sign(rand.Reader, b.PrivateKey, data)
 	if err != nil {
@@ -121,4 +119,13 @@ func(b *BitcoinKeys) Sign(data []byte) (string, error) {
 	}
 	w.Flush()
 	return hex.EncodeToString(bf.Bytes()), nil
+}
+
+func WalletAddressToPublicKeyHash(walletAddress []byte) []byte{
+	fullHash := utils.Base58Decode(walletAddress)
+	if len(fullHash) != 25 {
+		log.Panic("not valid Wallet!")
+	}
+	return fullHash[1:len(fullHash)-CHECKSUM_LENGTH]
+
 }

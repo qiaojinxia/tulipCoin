@@ -7,9 +7,9 @@ import "fmt"
  *  email:<115882934@qq.com>
  */
 
-func Mining(){
+func Mining(walletAddress []byte){
 	lastIndex,preHash := _BlockChain.GetLastBlockIndex()
-	block := NewBlock(lastIndex + 1,preHash,[]byte("Begin Mine Block,Good Luck!"))
+	block := NewBlock(lastIndex + 1,preHash,walletAddress,"Begin Mine Block,Good Luck!")
 	pow := NewProofOfWork(block)
 	nonce,blockHash := pow.Run()
 	block.Nonce = nonce

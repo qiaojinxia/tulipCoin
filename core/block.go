@@ -16,17 +16,21 @@ type Block struct {
 	Memorials  []*Memorial `json:"memorial"`
 	TimeStamp int64 `json:"time_stamp"`
 	Transactions []*Transaction `json:"transactions"`
+	MRoot  []byte `json:"root"`
 	Nonce int64 `json:"nonce"`
 	Version string `json:"version"`
 	Hash []byte `json:"hash"`
 }
 
-func NewBlock(index int,prevHash []byte,data []byte) *Block{
+func NewBlock(index int,prevHash []byte,toAddress []byte,memo string) *Block{
+	baseCoin := NewCoinbase(toAddress,memo)
 	return &Block{
 		Index:        int64(index),
 		PreviousHash: prevHash,
 		TimeStamp:    time.Now().UnixNano(),
-		Transactions:  make([]*Transaction,0),
+		Transactions:  []*Transaction{
+			baseCoin,
+		},
 		Version:      config.Version,
 	}
 }
