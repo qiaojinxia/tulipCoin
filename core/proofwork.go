@@ -64,6 +64,7 @@ func(pow *ProofOfWork) Run() (int64,[]byte){
 }
 
 func(pow *ProofOfWork) Validate() bool{
+	//Validate Diffculty
 	var hashInt big.Int
 	data := pow.prepareData(pow.block.Nonce)
 	hash := sha256.Sum256(data)

@@ -12,7 +12,7 @@ import (
 
 func main(){
 	keys := wallet.GetBitcoinKeys()
-	core.Mining(keys.GetAddress())
+	core.Mining(keys.GetAddress(),keys.PrivateKey)
 	//bitcoinAddress := keys.GetAddress()
 	//fmt.Println("TulipCoin Address:", string(bitcoinAddress))
 	//fmt.Printf("Verify TulipCoin Address:%v\n", wallet.IsVaildBitcoinAddress(string(bitcoinAddress)))

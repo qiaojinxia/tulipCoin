@@ -3,8 +3,9 @@ package core
 import (
 	"encoding/json"
 	"fmt"
-	"main/config"
+	"log"
 	"main/utils"
+	"strings"
 )
 
 /**
@@ -18,13 +19,13 @@ import (
 type BlocksChain struct {
 	size int
 	Blocks []*Block
-	*BlockChainDB
+	*utils.BlockChainDB
 }
 
 var _BlockChain *BlocksChain
 
 func init(){
-	blockChainDB,err := NewBlockChainDb()
+	blockChainDB,err := utils.NewBlockChainDb()
 	if err != nil{
 		panic(err)
 	}
@@ -39,7 +40,7 @@ func init(){
 	_BlockChain.BlockChainDB = blockChainDB
 	genesisBlock := CreateGenesisBlock()
 	_BlockChain.Blocks[0] = genesisBlock
-	res ,err := blockChainDB.Select(config.DbName)
+	res ,err := blockChainDB.IterAllBlock()
 	if err != nil{
 		panic(err)
 	}
@@ -60,6 +61,19 @@ func(bc *BlocksChain) GetLastBlockChain() *Block{
 	return bc.Blocks[bc.size]
 }
 
+func(bc *BlocksChain) FindTransactionByTxID(txID []byte) *Transaction{
+	b_tx,err := bc.GetTransactionByTxID(txID)
+	if err != nil{
+		panic(err)
+	}
+	tx := &Transaction{}
+	err = json.Unmarshal(b_tx,tx)
+	if err != nil{
+		panic(err)
+	}
+	return tx
+}
+
 func(bc *BlocksChain) AddBlock(block *Block){
 	if !ValidBlock(bc.GetLastBlockChain(),block){
 		return
@@ -71,8 +85,15 @@ func(bc *BlocksChain) AddBlock(block *Block){
 	if err != nil{
 		panic(err)
 	}
-	bc.Add(config.DbName,blockSerialize)
-	bc.PutBlockSize(utils.ToBytes(block.Index))
+	bc.StoreBlock(block.Index,blockSerialize)
+	for _,tx := range block.Transactions{
+		txSerlalize,err := json.Marshal(tx)
+		if err != nil{
+			log.Panic(err)
+		}
+		bc.StoreTransaction(tx.ID,txSerlalize)
+	}
+	bc.StoreBlockHeight(utils.ToBytes(block.Index))
 }
 
 func(bc *BlocksChain) GetLastBlockIndex() (int,[]byte){
@@ -88,7 +109,21 @@ func ShowBlockChainInfo(bc *BlocksChain){
 		fmt.Printf("Block  Hash : %x\n",block.Hash)
 		fmt.Printf("Block  Nonce : %d\n",block.Nonce)
 		fmt.Printf("Prev Block Hash : %x\n",block.PreviousHash)
+
+		txIDs := strings.Split(string(block.MRoot)," ")
+		txs := make([]Transaction,0)
+		for _,txID := range txIDs{
+			if txID == ""{
+				continue
+			}
+			tx := _BlockChain.FindTransactionByTxID([]byte(txID))
+			txs = append(txs, *tx)
+		}
+
+		fmt.Printf("Block Transactions : %v\n",txs)
+
 		fmt.Printf("Block TimeStamp : %d\n",block.TimeStamp)
+
 		fmt.Printf("==================\n")
 	}
 

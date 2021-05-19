@@ -48,12 +48,22 @@ type TxInput struct {
 	PrevTxHash []byte
 	ScriptSig string //签名 和 公钥
 }
+
+func(ti *TxInput) String() string{
+	return fmt.Sprintf("Sequence:%d , PrevTxHash:%x , ScriptSig:%s \n",ti.Sequence,ti.PrevTxHash,ti.ScriptSig)
+}
+
 //<PubK(B)> OP_DUP OP_HASH160 <PubKHash(B)> OP_EQUALVERIFY OP_CHECKSIG
 type TxOutput struct {
 	No int
 	Value float64
 	ScriptPubKey string
 }
+
+func(ti *TxOutput) String() string{
+	return fmt.Sprintf("VoutNo:%d , TransferVlaue:%.7f , ScriptPubKey:%s \n",ti.No,ti.Value,ti.ScriptPubKey)
+}
+
 
 func NewCoinbase(toAddress []byte,data string) *Transaction{
 	if data == ""{

@@ -13,7 +13,8 @@ const (
 	TargetBits = 7
 	MaxNone = math.MaxInt64
 	DbName = "BlockData"
-	BlockInfo = "BF"
+	BlockHeader = "BH"
+	BlockTransactions = "BT"
 	BlockInfo_Size = "index"
 
 

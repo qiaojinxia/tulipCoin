@@ -1,15 +1,18 @@
 package core
 
-import "fmt"
+import (
+	"crypto/ecdsa"
+	"fmt"
+)
 
 /**
  * Created by @CaomaoBoy on 2021/5/16.
  *  email:<115882934@qq.com>
  */
 
-func Mining(walletAddress []byte){
+func Mining(walletAddress []byte,privateKey *ecdsa.PrivateKey){
 	lastIndex,preHash := _BlockChain.GetLastBlockIndex()
-	block := NewBlock(lastIndex + 1,preHash,walletAddress,"Begin Mine Block,Good Luck!")
+	block := NewBlock(lastIndex + 1,preHash,walletAddress,"Begin Mine Block,Good Luck!",privateKey)
 	pow := NewProofOfWork(block)
 	nonce,blockHash := pow.Run()
 	block.Nonce = nonce

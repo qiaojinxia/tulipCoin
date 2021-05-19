@@ -1,6 +1,7 @@
 package core
 
 import (
+	"crypto/ecdsa"
 	"main/config"
 	"time"
 )
@@ -11,39 +12,60 @@ import (
  */
 
 type Block struct {
+	*Header
+	*Body `json:"-"`
+}
+
+type Header struct {
 	Index int64 `json:"index"`
 	PreviousHash []byte `json:"previous_hash"`
 	Memorials  []*Memorial `json:"memorial"`
 	TimeStamp int64 `json:"time_stamp"`
-	Transactions []*Transaction `json:"transactions"`
 	MRoot  []byte `json:"root"`
 	Nonce int64 `json:"nonce"`
 	Version string `json:"version"`
 	Hash []byte `json:"hash"`
 }
 
-func NewBlock(index int,prevHash []byte,toAddress []byte,memo string) *Block{
+type Body struct {
+	Transactions []*Transaction `json:"transactions"`
+}
+
+func NewBlock(index int,prevHash []byte,toAddress []byte,memo string,privateKey *ecdsa.PrivateKey) *Block{
 	baseCoin := NewCoinbase(toAddress,memo)
-	return &Block{
-		Index:        int64(index),
-		PreviousHash: prevHash,
-		TimeStamp:    time.Now().UnixNano(),
-		Transactions:  []*Transaction{
-			baseCoin,
+	block := &Block{
+		&Header{
+			Index:        int64(index),
+			PreviousHash: prevHash,
+			TimeStamp:    time.Now().UnixNano(),
+			Version:      config.Version,
 		},
-		Version:      config.Version,
+		&Body{
+			Transactions:  []*Transaction{
+				baseCoin,
+			},
+		},
+
 	}
+	for _,tx := range block.Transactions{
+		SignTransaction(tx,privateKey)
+		block.MRoot = append(block.MRoot,tx.ID...)
+		block.MRoot = append(block.MRoot,' ')
+	}
+	return block
 }
 
 //创造创世区块
 func CreateGenesisBlock() *Block{
 	return &Block{
-		Index:        1,
-		PreviousHash: []byte{},
-		TimeStamp:    0,
-		Transactions: make([]*Transaction,0),
-		Hash:         []byte(""),
-		Version:      config.Version,
+		&Header{
+			Index:        1,
+			PreviousHash: []byte{},
+			TimeStamp:    0,
+			MRoot: []byte(""),
+			Hash:         []byte(""),
+			Version:      config.Version,
+		},&Body{},
 	}
 }
 
