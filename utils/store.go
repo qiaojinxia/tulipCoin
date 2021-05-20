@@ -7,9 +7,26 @@ package utils
 import (
 	"fmt"
 	"github.com/boltdb/bolt"
+	"log"
 	"main/config"
 	"strconv"
+	"sync"
 )
+
+var once sync.Once
+var blockChaninDb *BlockChainDB
+
+func GetDb() *BlockChainDB{
+	once.Do(func() {
+		db,err := NewBlockChainDb()
+		if err != nil{
+			log.Panic(err)
+		}
+		blockChaninDb = db
+	})
+	return blockChaninDb
+
+}
 //BlotDB
 type BlockChainDB struct {
 	db *bolt.DB //db
@@ -91,7 +108,6 @@ func(m *BlockChainDB) GetAllTransactions() (transactions [][]byte,err error){
 	})
 	return
 }
-
 
 func (m *BlockChainDB) IterAllBlock() (res map[int64][]byte,err error) {
 	blockJsonMap := make(map[int64][]byte)

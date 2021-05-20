@@ -11,6 +11,7 @@ import (
 	"encoding/hex"
 	"golang.org/x/crypto/ripemd160"
 	"log"
+	"main/config"
 	"main/utils"
 )
 
@@ -20,7 +21,7 @@ import (
  */
 
 const VERSION = byte(0x00)
-const CHECKSUM_LENGTH = 4
+
 
 
 type BitcoinKeys struct {
@@ -77,7 +78,7 @@ func (b *BitcoinKeys) GetPrivateKey() []byte{
 func CheckSumHash(versionPublickeyHash []byte) []byte {
 	versionPublickeyHashSha1 := sha256.Sum256(versionPublickeyHash)
 	versionPublickeyHashSha2 := sha256.Sum256(versionPublickeyHashSha1[:])
-	tailHash := versionPublickeyHashSha2[:CHECKSUM_LENGTH]
+	tailHash := versionPublickeyHashSha2[:config.CHECKSUM_LENGTH]
 	return tailHash
 }
 
@@ -87,8 +88,8 @@ func IsVaildBitcoinAddress(address string) bool {
 	if len(fullHash) != 25 {
 		return false
 	}
-	prefixHash := fullHash[:len(fullHash)-CHECKSUM_LENGTH]
-	tailHash := fullHash[len(fullHash)-CHECKSUM_LENGTH:]
+	prefixHash := fullHash[:len(fullHash)-config.CHECKSUM_LENGTH]
+	tailHash := fullHash[len(fullHash)-config.CHECKSUM_LENGTH:]
 	tailHash2 := CheckSumHash(prefixHash)
 	if bytes.Compare(tailHash, tailHash2[:]) == 0 {
 		return true
@@ -121,11 +122,3 @@ func(b *BitcoinKeys) Sign(data []byte) (string, error) {
 	return hex.EncodeToString(bf.Bytes()), nil
 }
 
-func WalletAddressToPublicKeyHash(walletAddress []byte) []byte{
-	fullHash := utils.Base58Decode(walletAddress)
-	if len(fullHash) != 25 {
-		log.Panic("not valid Wallet!")
-	}
-	return fullHash[1:len(fullHash)-CHECKSUM_LENGTH]
-
-}

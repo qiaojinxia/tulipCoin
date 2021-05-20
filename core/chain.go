@@ -19,17 +19,12 @@ import (
 type BlocksChain struct {
 	size int
 	Blocks []*Block
-	*utils.BlockChainDB
 }
 
 var _BlockChain *BlocksChain
 
 func init(){
-	blockChainDB,err := utils.NewBlockChainDb()
-	if err != nil{
-		panic(err)
-	}
-	index,err := blockChainDB.GetBlockSize()
+	index,err := utils.GetDb().GetBlockSize()
 	if err != nil{
 		panic(err)
 	}
@@ -37,10 +32,9 @@ func init(){
 		size:   index,
 		Blocks: make([]*Block,index + 1),
 	}
-	_BlockChain.BlockChainDB = blockChainDB
 	genesisBlock := CreateGenesisBlock()
 	_BlockChain.Blocks[0] = genesisBlock
-	res ,err := blockChainDB.IterAllBlock()
+	res ,err := utils.GetDb().IterAllBlock()
 	if err != nil{
 		panic(err)
 	}
@@ -62,7 +56,7 @@ func(bc *BlocksChain) GetLastBlockChain() *Block{
 }
 
 func(bc *BlocksChain) FindTransactionByTxID(txID []byte) *Transaction{
-	b_tx,err := bc.GetTransactionByTxID(txID)
+	b_tx,err := utils.GetDb().GetTransactionByTxID(txID)
 	if err != nil{
 		panic(err)
 	}
@@ -83,17 +77,26 @@ func(bc *BlocksChain) AddBlock(block *Block){
 	bc.size ++
 	blockSerialize,err := json.Marshal(block)
 	if err != nil{
-		panic(err)
+		log.Panic(err)
 	}
-	bc.StoreBlock(block.Index,blockSerialize)
+	err = utils.GetDb().StoreBlock(block.Index,blockSerialize)
+	if err != nil{
+		log.Panic(err)
+	}
 	for _,tx := range block.Transactions{
 		txSerlalize,err := json.Marshal(tx)
 		if err != nil{
 			log.Panic(err)
 		}
-		bc.StoreTransaction(tx.ID,txSerlalize)
+		err = utils.GetDb().StoreTransaction(tx.ID,txSerlalize)
+		if err != nil{
+			log.Panic(err)
+		}
 	}
-	bc.StoreBlockHeight(utils.ToBytes(block.Index))
+	err = utils.GetDb().StoreBlockHeight(utils.ToBytes(block.Index))
+	if err != nil{
+		log.Panic(err)
+	}
 }
 
 func(bc *BlocksChain) GetLastBlockIndex() (int,[]byte){

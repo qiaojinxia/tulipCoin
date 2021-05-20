@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"log"
 	"main/config"
-	"main/wallet"
+	"main/utils"
 )
 
 /**
@@ -37,7 +37,7 @@ func(tx *Transaction) SetID(){
 
 
 func(tx *Transaction) IsCoinbase() bool{
-	if  len(tx.Vin) ==1 && len(tx.Vin[0].PrevTxHash) == 1 && tx.Vin[0].Sequence == -1{
+	if  len(tx.Vin) ==1 && len(tx.Vin[0].PrevTxHash) == 0 && tx.Vin[0].Sequence == -1{
 		return true
 	}
 	return false
@@ -69,7 +69,7 @@ func NewCoinbase(toAddress []byte,data string) *Transaction{
 	if data == ""{
 		data = fmt.Sprintf("Reward to '%s'",toAddress)
 	}
-	publicKeyHash:= fmt.Sprintf("OP_DUP OP_HASH160 <%x> OP_EQUALVERIFY OP_CHECKSIG ", wallet.WalletAddressToPublicKeyHash(toAddress))
+	publicKeyHash:= fmt.Sprintf("OP_DUP OP_HASH160 %x OP_EQUALVERIFY OP_CHECKSIG ",utils.WalletAddressToPublicKeyHash(toAddress))
 	tx := &Transaction{
 		Vin:  []*TxInput{{PrevTxHash:[]byte{} ,ScriptSig: data,Sequence: -1}},
 		Vout: []*TxOutput{{Value:config.RewardCoinn,ScriptPubKey: publicKeyHash,No:1}},
@@ -110,7 +110,7 @@ func SignTransaction(transaction *Transaction,privateKey *ecdsa.PrivateKey){
 			log.Panic(err)
 		}
 		signature := append(r.Bytes(),s.Bytes()...)
-		transaction.Vin[index].ScriptSig = fmt.Sprintf("<%x> <%x>",signature,bak)
+		transaction.Vin[index].ScriptSig = fmt.Sprintf("%x %x",signature,bak)
 	}
 	transaction.SetID()
 }

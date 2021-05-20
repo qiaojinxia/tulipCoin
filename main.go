@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"main/core"
 	"main/wallet"
 )
@@ -12,7 +13,10 @@ import (
 
 func main(){
 	keys := wallet.GetBitcoinKeys()
+	fmt.Println(string(keys.GetAddress()))
 	core.Mining(keys.GetAddress(),keys.PrivateKey)
+	//wallet.GetBalance()
+
 	//bitcoinAddress := keys.GetAddress()
 	//fmt.Println("TulipCoin Address:", string(bitcoinAddress))
 	//fmt.Printf("Verify TulipCoin Address:%v\n", wallet.IsVaildBitcoinAddress(string(bitcoinAddress)))

@@ -16,7 +16,7 @@ const (
 	BlockHeader = "BH"
 	BlockTransactions = "BT"
 	BlockInfo_Size = "index"
-
+    CHECKSUM_LENGTH = 4
 
 	RewardCoinn = 7
 )
