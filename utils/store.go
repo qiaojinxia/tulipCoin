@@ -130,6 +130,7 @@ func (m *BlockChainDB) IterAllBlock() (res map[int64][]byte,err error) {
 }
 
 
+
 func (m *BlockChainDB) Close() error {
 	return m.db.Close()
 }
