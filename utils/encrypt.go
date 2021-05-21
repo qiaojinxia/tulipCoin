@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"log"
 	"main/config"
 )
@@ -17,3 +18,13 @@ func WalletAddressToPublicKeyHash(walletAddress []byte) []byte{
 	return fullHash[1:len(fullHash)- config.CHECKSUM_LENGTH]
 
 }
+
+func GenerateLockScript(walletAddress []byte) string{
+	return fmt.Sprintf("OP_DUP OP_HASH160 %x OP_EQUALVERIFY OP_CHECKSIG ",WalletAddressToPublicKeyHash(walletAddress))
+}
+
+
+func GenerateLockScriptByPublicHash(publicKey []byte) string{
+	return fmt.Sprintf("OP_DUP OP_HASH160 %x OP_EQUALVERIFY OP_CHECKSIG ",GeneratePublicKeyHash(publicKey))
+}
+

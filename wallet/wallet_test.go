@@ -25,5 +25,9 @@ func TestGetWalletAddressBalance(t *testing.T) {
 	spendUtxo := GetUtxoSpended()
 	unSpendUtxo := GetUtxoUnSpend(spendUtxo)
 	val := GetWalletAddressBalance([]byte("1Q1w7NaikzaDgYZKngope6hnMLofok85tj"),unSpendUtxo)
-	fmt.Println(val)
+	fmt.Printf("Surplus Amount %.6f", val)
+}
+
+func TestWalletTransfer(t *testing.T) {
+	//WalletTransfer()
 }

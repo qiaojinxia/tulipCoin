@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"main/core"
+	"main/utils"
 	"main/wallet"
 )
 
@@ -12,9 +13,10 @@ import (
  */
 
 func main(){
-	keys := wallet.GetBitcoinKeys()
+	keys := utils.GetBitcoinKeys()
 	fmt.Println(string(keys.GetAddress()))
 	core.Mining(keys.GetAddress(),keys.PrivateKey)
+	wallet.WalletTransfer(keys.PublicKey,keys.PrivateKey,[]byte("1Q1w7NaikzaDgYZKngope6hnMLofok85tj"),2)
 	//wallet.GetBalance()
 
 	//bitcoinAddress := keys.GetAddress()

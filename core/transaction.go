@@ -6,6 +6,7 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/gob"
+	"errors"
 	"fmt"
 	"log"
 	"main/config"
@@ -49,6 +50,7 @@ type TxInput struct {
 	ScriptSig string //签名 和 公钥
 }
 
+
 func(ti *TxInput) String() string{
 	return fmt.Sprintf("Sequence:%d , PrevTxHash:%x , ScriptSig:%s \n",ti.Sequence,ti.PrevTxHash,ti.ScriptSig)
 }
@@ -59,6 +61,7 @@ type TxOutput struct {
 	Value float64
 	ScriptPubKey string
 }
+
 
 func(ti *TxOutput) String() string{
 	return fmt.Sprintf("VoutNo:%d , TransferVlaue:%.7f , ScriptPubKey:%s \n",ti.No,ti.Value,ti.ScriptPubKey)
@@ -78,22 +81,42 @@ func NewCoinbase(toAddress []byte,data string) *Transaction{
 	return tx
 }
 
-func NewTransaction(publicKey []byte,publicKeyHash []byte) *Transaction{
+func NewTransaction(publicKey []byte,toWalletAddress []byte,txOuts map[string]TxOutput,amount float64) (*Transaction,error){
+	txInputs := make([]*TxInput,0,len(txOuts))
+	txOutputs := make([]*TxOutput,0)
+	sum := 0.0
+	for txID,txOut := range txOuts{
+		sum += txOut.Value
+		txInputs = append(txInputs, &TxInput{
+			Sequence:   txOut.No,
+			PrevTxHash: []byte(txID),
+			ScriptSig:  string(publicKey),
+		})
+	}
+	transferOut := &TxOutput{
+		No:           len(txOutputs),
+		Value:        amount,
+		ScriptPubKey: utils.GenerateLockScript(toWalletAddress),
+	}
+	txOutputs = append(txOutputs, transferOut)
+	//surplus change transfer to self address
+	if sum > amount {
+		surplus := sum - amount
+		sTo := &TxOutput{
+			No:           len(txOutputs),
+			Value:        surplus,
+			ScriptPubKey: utils.GenerateLockScriptByPublicHash(publicKey),
+		}
+		txOutputs = append(txOutputs, sTo)
+	}else if sum < amount{
+		return nil,errors.New("Not Enought UTXO Can Transfer!")
+	}
 	tx := &Transaction{
 		ID:   nil,
-		Vin:  []*TxInput{{
-			Sequence:      0,
-			PrevTxHash:    []byte("asdasdasdasd12312"),
-			ScriptSig: fmt.Sprintf("%x",publicKey),
-		},
-		},
-		Vout: []*TxOutput{
-			{No:1,
-			Value:60.0,
-			ScriptPubKey:fmt.Sprintf("OP_DUP OP_HASH160 <%x> OP_EQUALVERIFY OP_CHECKSIG ",publicKeyHash)},
-		},
+		Vin: txInputs,
+		Vout: txOutputs,
 	}
-	return tx
+	return tx,nil
 }
 
 func SignTransaction(transaction *Transaction,privateKey *ecdsa.PrivateKey){

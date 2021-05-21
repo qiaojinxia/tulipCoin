@@ -1,4 +1,4 @@
-package wallet
+package utils
 
 import (
 	"bytes"
@@ -12,7 +12,6 @@ import (
 	"golang.org/x/crypto/ripemd160"
 	"log"
 	"main/config"
-	"main/utils"
 )
 
 /**
@@ -65,7 +64,7 @@ func (b *BitcoinKeys) GetAddress() []byte {
 	//4.join bytes slic  versionPublickeyHash + checksumHash
 	finalHash := append(versionPublickeyHash, tailHash...)
 	//5.Do base58 encryption
-	address := utils.Base58Encode(finalHash)
+	address := Base58Encode(finalHash)
 	return address
 }
 func (b *BitcoinKeys) GetPrivateKey() []byte{
@@ -73,7 +72,7 @@ func (b *BitcoinKeys) GetPrivateKey() []byte{
 	if err != nil{
 		log.Panic(err)
 	}
-	return utils.Base58Encode(ecder)
+	return Base58Encode(ecder)
 }
 func CheckSumHash(versionPublickeyHash []byte) []byte {
 	versionPublickeyHashSha1 := sha256.Sum256(versionPublickeyHash)
@@ -84,7 +83,7 @@ func CheckSumHash(versionPublickeyHash []byte) []byte {
 
 func IsVaildBitcoinAddress(address string) bool {
 	adddressByte := []byte(address)
-	fullHash := utils.Base58Decode(adddressByte)
+	fullHash := Base58Decode(adddressByte)
 	if len(fullHash) != 25 {
 		return false
 	}
