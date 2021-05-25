@@ -85,6 +85,9 @@ func(ts *TcpServer) Listen(){
 }
 
 func Handle(conn net.Conn,stopCh <-chan struct{}){
+	se := &Session{conn: conn,ID: time.Now().UnixNano()}
+	_SessionManger.AddSession(se)
+	log.Printf("Client %d Online!",se.ID)
 	for{
 		select {
 		case <- stopCh:
@@ -96,20 +99,27 @@ func Handle(conn net.Conn,stopCh <-chan struct{}){
 			buff := make([]byte,1024)
 			rlen,err := conn.Read(buff)
 			if err != nil{
+				_SessionManger.RemoveSession(se.ID)
 				if err == io.EOF{
+					log.Printf("Client %d Offline!",se.ID)
 					return
 				}
 				utils.NetErroWarp(err.Error())
+				return
 			}
 			cacaheBuffer := make([]byte,0)
 			msg,ok := UnPack(buff[:rlen],&cacaheBuffer)
 			if ok {
 				utils.GO_Func(
 					func() {
-						myfunc,exist := HandlerFunc[int(msg.HandleNo)]
-						if exist{
-							myfunc(msg.Body)
-						}
+						utils.Try(func() {
+							myfunc,exist := HandlerFunc[int(msg.HandleNo)]
+							if exist{
+								myfunc(se,msg.Body)
+							}
+						}).CatchAll(func(err error) {
+							log.Printf("catch error %s",err.Error())
+						})
 					})
 			}
 		}

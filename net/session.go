@@ -7,11 +7,34 @@ import "net"
  *  email:<115882934@qq.com>
  */
 
-//User Session
-type Session struct {
-	conn net.Conn
+var _SessionManger = SessionManager{Sessions: make(map[int64]*Session)}
+
+type SessionManager struct {
+	Sessions map[int64]*Session
 }
 
-func(se *Session) ReplyMsg(){
+func(sm *SessionManager) AddSession(session *Session){
+	if _,ok := sm.Sessions[session.ID];ok{
+		return
+	}
+	sm.Sessions[session.ID] = session
+}
+
+func(sm *SessionManager) RemoveSession(ID int64) bool{
+	if _,ok := sm.Sessions[ID];ok{
+		delete(sm.Sessions, ID)
+		return ok
+	}
+	return false
+}
+
+//User Session
+type Session struct {
+	ID int64
+	conn net.Conn
+	MsgChan chan []byte
+}
+
+func(se *Session) AsyncMsg(){
 
 }
