@@ -1,6 +1,9 @@
-package net
+package netpkg
 
-import "net"
+import (
+	"main/utils"
+	"net"
+)
 
 /**
  * Created by @CaomaoBoy on 2021/5/22.
@@ -11,6 +14,14 @@ var _SessionManger = SessionManager{Sessions: make(map[int64]*Session)}
 
 type SessionManager struct {
 	Sessions map[int64]*Session
+}
+func(sm *SessionManager) Broadcast(msg []byte){
+	for _,v := range sm.Sessions{
+		_,err := v.conn.Write(msg)
+		if err != nil{
+			panic(utils.NetErroWarp(err.Error()))
+		}
+	}
 }
 
 func(sm *SessionManager) AddSession(session *Session){

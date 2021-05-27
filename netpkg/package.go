@@ -1,4 +1,4 @@
-package net
+package netpkg
 
 import (
 	"bytes"
@@ -15,6 +15,7 @@ const HeaderLen = 5
 
 type Msg struct {
 	MagicNum int8 //MagicNum
+	//Sequence int32  //msg Sequence
 	Len int32 //Data Len maxLen
 	HandleNo int32 //handle protol
 	Body []byte //Body data
@@ -29,26 +30,23 @@ func Pack(body []byte,HandleNo int) []byte{
 			body},
 		[]byte{})
 }
-
-
-func UnPack(data []byte,cacheBuffer *[]byte) (*Msg,bool){
+func UnPack(data []byte,cacheBuffer *[]byte,msg *Msg) bool{
 	var newData []byte
 	var length int32
 	if len(*cacheBuffer) == 0{
 		if len(data) <= HeaderLen{
 			*cacheBuffer = append(*cacheBuffer,data...)
-			return nil,false
+			return false
 		}
 		validMagic := data[0]
 		if validMagic != MagicNum{
 			utils.NetErroWarp("Invalid Data Flow")
 		}
 		length = utils.BytesToInt32(data[1:HeaderLen])
-		//data = data[HeaderLen:]
 		surPlus := int(length) - (len(data) - HeaderLen)
 		if surPlus > 0 {
 			*cacheBuffer = append(*cacheBuffer,data...)
-			return nil,false
+			return false
 		}else if surPlus == 0 {
 			newData = data
 		}else if surPlus < 0 {
@@ -69,7 +67,7 @@ func UnPack(data []byte,cacheBuffer *[]byte) (*Msg,bool){
 		totalLen := len(data) + len(*cacheBuffer)
 		if totalLen < int(length){
 			*cacheBuffer = append(*cacheBuffer, data...)
-			return nil,false
+			return false
 		}else if totalLen >= int(length){
 			nlen := int(length)  - len(*cacheBuffer) + HeaderLen
 			needData := data[:nlen]
@@ -78,10 +76,9 @@ func UnPack(data []byte,cacheBuffer *[]byte) (*Msg,bool){
 			newData = tmp
 		}
 	}
-	return &Msg{
-		MagicNum: MagicNum,
-		Len:      length,
-		HandleNo: utils.BytesToInt32(newData[HeaderLen:HeaderLen+4]),
-		Body:     newData[HeaderLen + 4:],
-	},true
+	msg.MagicNum = MagicNum
+	msg.Len = length
+	msg.HandleNo = utils.BytesToInt32(newData[HeaderLen:HeaderLen+4])
+	msg.Body = newData[HeaderLen + 4:]
+	return true
 }

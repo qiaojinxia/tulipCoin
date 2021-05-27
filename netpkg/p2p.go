@@ -1,4 +1,4 @@
-package net
+package netpkg
 
 /**
  * Created by @CaomaoBoy on 2021/5/21.

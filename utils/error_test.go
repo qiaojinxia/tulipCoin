@@ -11,5 +11,5 @@ import (
  */
 
 func Test_error(t *testing.T) {
-	fmt.Println(StackErrorWarp("错误了!").ConverToJsonInfo())
+	fmt.Println(ConverToJsonInfo(StackErrorWarp("错误了!")))
 }

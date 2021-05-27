@@ -1,4 +1,4 @@
-package net
+package netpkg
 
 import (
 	"encoding/json"
@@ -25,8 +25,9 @@ func Test_Package(t *testing.T) {
 	xxxx1[0] = t1
 	xxxx1[1] = t2
 	xxxx1[2] = t3
+	var msg *Msg
 	for i:=0;i<3;i++{
-		msg,ok := UnPack(xxxx1[i],&cacheBuff)
+		ok := UnPack(xxxx1[i],&cacheBuff,msg )
 		if ok{
 			dt,err := json.Marshal(msg)
 			if err != nil{

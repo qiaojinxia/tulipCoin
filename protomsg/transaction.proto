@@ -1,0 +1,21 @@
+syntax = "proto3";
+package protomsg;
+
+message Transaction{
+  bytes ID = 1;
+   repeated TxInput Vin= 2;
+   repeated TxOutput Vount= 3;
+}
+
+message TxInput {
+  int64 Sequence = 1;
+  bytes PrevTxHash = 2;
+  string ScriptSig = 3;//签名 和 公钥
+}
+
+message TxOutput {
+  int64 No = 1;
+  float Value = 2;
+  string ScriptPubKey = 3;
+}
+

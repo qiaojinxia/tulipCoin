@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"main/core"
+	"main/dto"
 	"main/utils"
 	"sort"
 	"strings"
@@ -87,7 +88,7 @@ func GetWalletAddressBalance(walletPublicKeyHash []byte,allUnUsedOutPut map[stri
 	return ownUnusedUtxo
 }
 
-func WalletTransfer(publicKey []byte,privateKey *ecdsa.PrivateKey,toWalletAddress []byte,amount float64){
+func WalletTransfer(publicKey []byte,privateKey *ecdsa.PrivateKey,toWalletAddress []byte,amount float64) ([]byte,error){
 	if !utils.IsVaildBitcoinAddress(string(toWalletAddress)){
 		log.Panic("Invalid Wallet!")
 	}
@@ -128,7 +129,7 @@ func WalletTransfer(publicKey []byte,privateKey *ecdsa.PrivateKey,toWalletAddres
 	}
 	core.SignTransaction(tx,privateKey)
 	// 4.Add to UTXO Pool
-
+	return  dto.PConvertTransactionBytes(tx)
 }
 
 

@@ -16,7 +16,14 @@ func main(){
 	keys := utils.GetBitcoinKeys()
 	fmt.Println(string(keys.GetAddress()))
 	core.Mining(keys.GetAddress(),keys.PrivateKey)
-	wallet.WalletTransfer(keys.PublicKey,keys.PrivateKey,[]byte("1Q1w7NaikzaDgYZKngope6hnMLofok85tj"),2)
+	bx,_ := wallet.WalletTransfer(keys.PublicKey,keys.PrivateKey,[]byte("1Q1w7NaikzaDgYZKngope6hnMLofok85tj"),2)
+	cli := wallet.WalletClient{}
+
+	cli.Listen()
+
+	cli.SendMsg(bx)
+
+	select {}
 	//wallet.GetBalance()
 
 	//bitcoinAddress := keys.GetAddress()

@@ -2,7 +2,7 @@ package utils
 
 import (
 	"encoding/json"
-	"errors"
+
 	"reflect"
 )
 
@@ -11,37 +11,69 @@ import (
  *  email:<115882934@qq.com>
  */
 
-type NetError error
-type StackError error
 
-type ErrorInfo struct {
-	Code int
-	Name string
+
+
+
+type  BasicError struct {
+	error string
 }
 
-var ErrorsMap = make(map[reflect.Type]*ErrorInfo)
+func (n *BasicError) Error() string {
+	return n.error
+}
+
+func (n *BasicError) RuntimeError() {
+	panic(n.error)
+}
+
+type NetError struct {
+	BasicError
+}
+
+type BusinessError struct {
+	BasicError
+}
+
+type MarshalError struct {
+	BasicError
+}
+
+type StackError struct {
+	BasicError
+}
+
+var ErrorsMap = make(map[reflect.Type]int)
+
 func init(){
-	ErrorsMap[reflect.TypeOf(NetErroWarp("").error)] = &ErrorInfo{
-		Code: 100,
-		Name: "NetError",
-	}
-	ErrorsMap[reflect.TypeOf(StackErrorWarp("").error)] = &ErrorInfo{
-		Code: 200,
-		Name: "StackError",
-	}
+	ErrorsMap[reflect.TypeOf(NetErroWarp(""))] = 100
+	ErrorsMap[reflect.TypeOf(StackErrorWarp(""))] = 200
+	ErrorsMap[reflect.TypeOf(BusinessErrorWarp(""))] = 300
+	ErrorsMap[reflect.TypeOf(MarshalErrorWarp(""))] = 400
 }
 
 
-type TError struct {
-	error
-
+func MarshalErrorWarp(msg string) error{
+	return &MarshalError{BasicError{
+		error: msg,
+	}}
 }
-func StackErrorWarp(msg string) *TError{
-	return &TError{error:StackError(errors.New(msg))}
+func StackErrorWarp(msg string) error{
+	return &StackError{BasicError{
+		error: msg,
+	}}
 }
 
-func NetErroWarp(msg string) *TError{
-	return &TError{error:NetError(errors.New(msg))}
+func BusinessErrorWarp(msg string) error{
+	return &BusinessError{BasicError{
+		error: msg,
+	}}
+}
+
+func NetErroWarp(msg string) error{
+	return &NetError{BasicError{
+		error: msg,
+	}}
 }
 
 type ErrroMsg struct {
@@ -49,12 +81,13 @@ type ErrroMsg struct {
 	ErrorType string `json:"error_type"`
 	Msg string `json:"msg"`
 }
-func(t *TError) ConverToJsonInfo() string{
-	info := ErrorsMap[reflect.TypeOf(t.error)]
+
+
+func ConverToJsonInfo(err error) string{
 	emsg := &ErrroMsg{
-		Code: info.Code,
-		ErrorType: info.Name,
-		Msg:  t.error.Error(),
+		Code: ErrorsMap[reflect.TypeOf(err)],
+		ErrorType: reflect.TypeOf(err).Elem().Name(),
+		Msg:  err.Error(),
 	}
 	data,err := json.Marshal(emsg)
 	if err != nil{

@@ -1,4 +1,4 @@
-package net
+package netpkg
 
 import (
 	"fmt"
@@ -85,8 +85,9 @@ func(ts *TcpServer) Listen(){
 }
 
 func Handle(conn net.Conn,stopCh <-chan struct{}){
-	se := &Session{conn: conn,ID: time.Now().UnixNano()}
+	se := &Session{conn: conn,ID: utils.GetUserID()}
 	_SessionManger.AddSession(se)
+	cacaheBuffer := make([]byte,0)
 	log.Printf("Client %d Online!",se.ID)
 	for{
 		select {
@@ -107,22 +108,26 @@ func Handle(conn net.Conn,stopCh <-chan struct{}){
 				utils.NetErroWarp(err.Error())
 				return
 			}
-			cacaheBuffer := make([]byte,0)
-			msg,ok := UnPack(buff[:rlen],&cacaheBuffer)
-			if ok {
-				utils.GO_Func(
+			msg := &Msg{}
+			for {
+				ok := UnPack(buff[:rlen],&cacaheBuffer,msg)
+				if ok{
+					break
+				}
+			}
+			utils.GO_Func(
 					func() {
-						utils.Try(func() {
 							myfunc,exist := HandlerFunc[int(msg.HandleNo)]
 							if exist{
-								myfunc(se,msg.Body)
+								msgRsp, err := myfunc(se, msg.Body)
+								if err != nil{
+									utils.BusinessErrorWarp(err.Error())
+								}
+								conn.Write(msgRsp)
 							}
-						}).CatchAll(func(err error) {
-							log.Printf("catch error %s",err.Error())
-						})
+
 					})
 			}
 		}
 	}
 
-}

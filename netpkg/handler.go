@@ -1,7 +1,8 @@
-package net
+package netpkg
 
 import (
-	"log"
+	"main/core"
+	"main/dto"
 )
 
 /**
@@ -14,7 +15,10 @@ var HandlerFunc = make(map[int]func(session *Session,data []byte) ([]byte,error)
 
 func init(){
 	HandlerFunc[0] = func(session *Session,data []byte) ([]byte, error) {
-		log.Printf("Handler Request: %v!",string(data))
+		transaction := dto.ConvertTransactionBytes(data)
+		ctp := core.GetCtxPool()
+		tmpt := &core.CTxMemPoolEntry{CTransactionRef: transaction}
+		ctp.AddTxToPool(tmpt)
 		return []byte("handler Success!"),nil
 	}
 }
