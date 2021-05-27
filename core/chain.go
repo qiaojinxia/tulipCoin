@@ -113,7 +113,7 @@ func ShowBlockChainInfo(bc *BlocksChain){
 		fmt.Printf("Block  Nonce : %d\n",block.Nonce)
 		fmt.Printf("Prev Block Hash : %x\n",block.PreviousHash)
 
-		txIDs := strings.Split(string(block.MRoot)," ")
+		txIDs := strings.Split(string(block.MRoot),":")
 		txs := make([]Transaction,0)
 		for _,txID := range txIDs{
 			if txID == ""{

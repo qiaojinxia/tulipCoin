@@ -13,17 +13,22 @@ import (
  */
 
 func main(){
-	keys := utils.GetBitcoinKeys()
+	keys := utils.LoadWallet("./wallet/sercurt.key")
 	fmt.Println(string(keys.GetAddress()))
+	ok := utils.IsVaildBitcoinAddress(string(keys.GetAddress()))
+	if !ok{
+		panic("err")
+	}
 	core.Mining(keys.GetAddress(),keys.PrivateKey)
-	bx,_ := wallet.WalletTransfer(keys.PublicKey,keys.PrivateKey,[]byte("1Q1w7NaikzaDgYZKngope6hnMLofok85tj"),2)
-	cli := wallet.WalletClient{}
-
-	cli.Listen()
-
-	cli.SendMsg(bx)
-
-	select {}
+	fmt.Printf("amount %.6f\n",wallet.GetWalletBalance(keys.PublicKey))
+	//bx,_ := wallet.WalletTransfer(keys.PublicKey,keys.PrivateKey,[]byte("1Q1w7NaikzaDgYZKngope6hnMLofok85tj"),2)
+	//cli := wallet.WalletClient{}
+	//
+	//cli.Listen()
+	//
+	//cli.SendMsg(bx)
+	//
+	//select {}
 	//wallet.GetBalance()
 
 	//bitcoinAddress := keys.GetAddress()

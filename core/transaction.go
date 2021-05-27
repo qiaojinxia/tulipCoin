@@ -11,6 +11,7 @@ import (
 	"log"
 	"main/config"
 	"main/utils"
+	"time"
 )
 
 /**
@@ -22,6 +23,7 @@ type Transaction struct {
 	ID []byte
 	Vin []*TxInput
 	Vout []*TxOutput
+	TimeStamp int64
 
 }
 func(tx *Transaction) SetID(){
@@ -76,6 +78,7 @@ func NewCoinbase(toAddress []byte,data string) *Transaction{
 	tx := &Transaction{
 		Vin:  []*TxInput{{PrevTxHash:[]byte{} ,ScriptSig: data,Sequence: -1}},
 		Vout: []*TxOutput{{Value:config.RewardCoinn,ScriptPubKey: publicKeyHash,No:1}},
+		TimeStamp: time.Now().UnixNano(),
 	}
 	tx.SetID()
 	return tx

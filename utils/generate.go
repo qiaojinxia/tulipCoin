@@ -28,6 +28,16 @@ type BitcoinKeys struct {
 	PublicKey  []byte
 }
 
+func(bk *BitcoinKeys) KeysString() (string,string){
+	return encode(bk.PrivateKey,&bk.PrivateKey.PublicKey)
+}
+
+func(bk *BitcoinKeys) Init(sPrivateKey,sPublickey string){
+	privatKey,publicKey := decode(sPrivateKey,sPublickey)
+	bk.PrivateKey = privatKey
+	bk.PublicKey = append(publicKey.X.Bytes(), publicKey.Y.Bytes()...)
+}
+
 func GetBitcoinKeys() *BitcoinKeys {
 	b := &BitcoinKeys{nil, nil}
 	b.newKeyPair()
@@ -35,14 +45,14 @@ func GetBitcoinKeys() *BitcoinKeys {
 }
 
 //Elliptic curve generate  PublicKey
-func (b *BitcoinKeys) newKeyPair(){
+func (bk *BitcoinKeys) newKeyPair(){
 	curve := elliptic.P256()
 	var err error
-	b.PrivateKey, err = ecdsa.GenerateKey(curve, rand.Reader)
+	bk.PrivateKey, err = ecdsa.GenerateKey(curve, rand.Reader)
 	if err != nil{
 		log.Panic(err)
 	}
-	b.PublicKey = append(b.PrivateKey.PublicKey.X.Bytes(), b.PrivateKey.PublicKey.Y.Bytes()...)
+	bk.PublicKey = append(bk.PrivateKey.PublicKey.X.Bytes(), bk.PrivateKey.PublicKey.Y.Bytes()...)
 }
 
 func GeneratePublicKeyHash(publicKey []byte) []byte {
@@ -54,9 +64,9 @@ func GeneratePublicKeyHash(publicKey []byte) []byte {
 }
 
 //获取地址
-func (b *BitcoinKeys) GetAddress() []byte {
+func (bk *BitcoinKeys) GetAddress() []byte {
 	//1.ripemd160(sha256(publickey))
-	ripPubKey := GeneratePublicKeyHash(b.PublicKey)
+	ripPubKey := GeneratePublicKeyHash(bk.PublicKey)
 	//2.add one byte version info to head versionPublickeyHash
 	versionPublickeyHash := append([]byte{VERSION}, ripPubKey[:]...)
 	//3.checksumHash = sha256(sha256(versionPublickeyHash))[:4]
@@ -67,8 +77,8 @@ func (b *BitcoinKeys) GetAddress() []byte {
 	address := Base58Encode(finalHash)
 	return address
 }
-func (b *BitcoinKeys) GetPrivateKey() []byte{
-	ecder,err := x509.MarshalECPrivateKey(b.PrivateKey)
+func (bk *BitcoinKeys) GetPrivateKey() []byte{
+	ecder,err := x509.MarshalECPrivateKey(bk.PrivateKey)
 	if err != nil{
 		log.Panic(err)
 	}
@@ -97,8 +107,8 @@ func IsVaildBitcoinAddress(address string) bool {
 	}
 }
 
-func(b *BitcoinKeys) Sign(data []byte) (string, error) {
-	r, s, err := ecdsa.Sign(rand.Reader, b.PrivateKey, data)
+func(bk *BitcoinKeys) Sign(data []byte) (string, error) {
+	r, s, err := ecdsa.Sign(rand.Reader, bk.PrivateKey, data)
 	if err != nil {
 		return "", err
 	}

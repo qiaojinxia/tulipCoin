@@ -88,6 +88,19 @@ func GetWalletAddressBalance(walletPublicKeyHash []byte,allUnUsedOutPut map[stri
 	return ownUnusedUtxo
 }
 
+func GetWalletBalance(publicKey []byte) float64{
+	publicKeyHash := utils.GeneratePublicKeyHash(publicKey)
+	// 1.Find all the small charge
+	spendUtxo := GetUtxoSpended()
+	alUnSpendUtxo := GetUtxoUnSpend(spendUtxo)
+	utxoOutPut := GetWalletAddressBalance(publicKeyHash,alUnSpendUtxo)
+	amount := 0.0
+	for _,txout := range utxoOutPut{
+		amount += txout.Value
+	}
+	return amount
+}
+
 func WalletTransfer(publicKey []byte,privateKey *ecdsa.PrivateKey,toWalletAddress []byte,amount float64) ([]byte,error){
 	if !utils.IsVaildBitcoinAddress(string(toWalletAddress)){
 		log.Panic("Invalid Wallet!")

@@ -50,7 +50,7 @@ func NewBlock(index int,prevHash []byte,toAddress []byte,memo string,privateKey 
 	for _,tx := range block.Transactions{
 		SignTransaction(tx,privateKey)
 		block.MRoot = append(block.MRoot,tx.ID...)
-		block.MRoot = append(block.MRoot,' ')
+		block.MRoot = append(block.MRoot,':')
 	}
 	return block
 }
