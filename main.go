@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"main/core"
+	"main/netpkg"
 	"main/utils"
 	"main/wallet"
 )
@@ -13,6 +14,14 @@ import (
  */
 
 func main(){
+	server := &netpkg.TcpServer{
+		Address:  "127.0.0.1",
+		Port:     "7777",
+		StopChan: make(chan struct{},1),
+	}
+	go func() {
+		server.Listen()
+	}()
 	keys := utils.LoadWallet("./wallet/sercurt.key")
 	fmt.Println(string(keys.GetAddress()))
 	ok := utils.IsVaildBitcoinAddress(string(keys.GetAddress()))
@@ -21,14 +30,14 @@ func main(){
 	}
 	core.Mining(keys.GetAddress(),keys.PrivateKey)
 	fmt.Printf("amount %.6f\n",wallet.GetWalletBalance(keys.PublicKey))
-	//bx,_ := wallet.WalletTransfer(keys.PublicKey,keys.PrivateKey,[]byte("1Q1w7NaikzaDgYZKngope6hnMLofok85tj"),2)
-	//cli := wallet.WalletClient{}
+	bx,_ := wallet.WalletTransfer(keys.PublicKey,keys.PrivateKey,[]byte("1Q1w7NaikzaDgYZKngope6hnMLofok85tj"),2)
+	cli := wallet.WalletClient{}
 	//
-	//cli.Listen()
+	cli.Listen()
 	//
-	//cli.SendMsg(bx)
+	cli.SendMsg(bx)
 	//
-	//select {}
+	select {}
 	//wallet.GetBalance()
 
 	//bitcoinAddress := keys.GetAddress()

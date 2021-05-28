@@ -24,7 +24,7 @@ func(od OpData) ConvertToBool() bool{
 	val := *(*string)(unsafe.Pointer(&od))
 	bo,err :=  strconv.ParseBool(val)
 	if err != nil{
-		utils.StackError("stackError")
+		utils.StackErrorWarp("stackError")
 	}
 	return bo
 }

@@ -12,9 +12,9 @@ import (
 
 func TestTcpServer_Listen(t *testing.T) {
 	server := &TcpServer{
-		Address: "127.0.0.1",
-		Port:    "7777",
-		stopChan: make(chan struct{},1),
+		Address:  "127.0.0.1",
+		Port:     "7777",
+		StopChan: make(chan struct{},1),
 	}
 	go func() {
 		time.Sleep(time.Second * 7)

@@ -1,6 +1,10 @@
 package svm
 
-import "main/utils"
+import (
+	"bytes"
+	"main/utils"
+	"strings"
+)
 
 /**
  * Created by @CaomaoBoy on 2021/5/1.
@@ -19,6 +23,10 @@ const(
 	PoPInt Operation = 4
 	DUMP Operation = 5
 	CMP_EQ_I64  Operation = 6
+	OP_HASH160 Operation = 7
+	OP_EQUALVERIFY Operation = 8
+	OP_CHECKSIG Operation = 9
+	OP_DUP = 10
 )
 
 type OperationCode struct {
@@ -27,8 +35,8 @@ type OperationCode struct {
 }
 
 func(s *Stack) Dump(){
-	//data := s.GetTop()
-	//s.Push(data)
+	data := s.GetTop()
+	s.PushBytes(data)
 }
 
 //Program runtime stack
@@ -39,14 +47,77 @@ type OperationStack struct {
 	pc                 int              //now OperationCode index
 }
 
+func NewOperationStack(script string) *OperationStack{
+	codes := strings.Split(script," ")
+	lovalVariable := make([][]byte,0,len(codes))
+	opCode := make([]*OperationCode,0,len(codes))
+	for _,code := range codes{
+		switch code {
+		case "OP_HASH160":
+			opcode := &OperationCode{Operation: OP_HASH160}
+			opCode = append(opCode,opcode)
+		case "OP_EQUALVERIFY":
+			opcode := &OperationCode{
+				Operation: OP_EQUALVERIFY}
+			opCode = append(opCode,opcode)
+		case "OP_CHECKSIG":
+			opcode := &OperationCode{
+				Operation: OP_CHECKSIG}
+			opCode = append(opCode,opcode)
+		case "OP_DUP":
+			opcode := &OperationCode{
+				Operation: OP_DUP}
+			opCode = append(opCode,opcode)
+		case "":
+			continue
+		default:
+			index := len(lovalVariable)
+			lovalVariable = append(lovalVariable, []byte(code))
+			opcode := &OperationCode{
+				Operation: PushBytes,
+				args:      [][]byte{
+					utils.ToBytes(index),
+				},
+			}
+			opCode = append(opCode,opcode)
+		}
+	}
+	return &OperationStack{
+		LocalVariableTable: lovalVariable,
+		Opcode:             opCode,
+		stack:              NewStack(),
+		pc:                 0,
+	}
+}
+
+func opHash160(stack *Stack,args [][]byte,localVariableTable [][]byte){
+	d1 := stack.PopBytes()
+
+}
+
+func opEqualverify(stack *Stack,args [][]byte,localVariableTable [][]byte){
+	d1 := stack.PopBytes()
+	d2 := stack.PopBytes()
+	res := bytes.Equal(d1,d2)
+	stack.PushBool(res)
+}
+
+func opChecksig(stack *Stack,args [][]byte,localVariableTable [][]byte){
+
+}
+
+func opDUP(stack *Stack,args [][]byte,localVariableTable [][]byte){
+	stack.Dump()
+}
+
 func pushBytes(stack *Stack,args [][]byte,localVariableTable [][]byte){
-	//for _,arg := range args{
-	//	dataIndex := utils.BytesToInt(arg)
-	//	if dataIndex > len(localVariableTable){
-	//		panic("index overflow")
-	//	}
-	//	stack.Push(localVariableTable[dataIndex])
-	//}
+	for _,arg := range args{
+		dataIndex := utils.BytesToInt64(arg)
+		if int(dataIndex) > len(localVariableTable){
+			utils.StackErrorWarp("index overflow")
+		}
+		stack.PushBytes(localVariableTable[dataIndex])
+	}
 }
 
 func storeBytes(stack *Stack,args [][]byte,localVariableTable [][]byte) {
@@ -60,7 +131,7 @@ func storeBytes(stack *Stack,args [][]byte,localVariableTable [][]byte) {
 
 
 
-func(os *OperationStack) Run(){
+func(os *OperationStack) Run() error {
 	for{
 		opCode := os.Opcode[os.pc]
 		switch opCode.Operation {
@@ -70,6 +141,14 @@ func(os *OperationStack) Run(){
 			storeBytes(os.stack,opCode.args,os.LocalVariableTable)
 		case CMP_EQ_I64:
 			cmpEqualInt64(os.stack)
+		case OP_DUP:
+			opDUP(os.stack,opCode.args,os.LocalVariableTable)
+		case OP_HASH160:
+			opHash160(os.stack,opCode.args,os.LocalVariableTable)
+		case OP_EQUALVERIFY:
+			opEqualverify(os.stack,opCode.args,os.LocalVariableTable)
+		case OP_CHECKSIG:
+			opChecksig(os.stack,opCode.args,os.LocalVariableTable)
 		}
 		os.pc ++
 	}

@@ -1,6 +1,11 @@
 package core
 
-import "sync"
+import (
+	"encoding/json"
+	"main/svm"
+	"main/utils"
+	"sync"
+)
 
 /**
  * Created by @CaomaoBoy on 2021/5/25.
@@ -32,7 +37,36 @@ type CtxMemPool struct {
 }
 
 func(cmp *CtxMemPool) AddTxToPool(ctxMemEntry *CTxMemPoolEntry){
-	cmp.Transactions = append(cmp.Transactions, ctxMemEntry)
+	//Verify Transaction
+	for _,vin := range ctxMemEntry.CTransactionRef.Vin{
+		bTransaction ,err := utils.GetDb().GetTransactionByTxID(vin.PrevTxHash)
+		if err != nil{
+			utils.BusinessErrorWarp(err.Error())
+		}
+		if bTransaction == nil{
+			continue
+		}
+		transaction := &Transaction{}
+		err = json.Unmarshal(bTransaction,transaction)
+		if err != nil{
+			utils.MarshalErrorWarp(err.Error())
+		}
+		for _,vOut := range  transaction.Vout {
+			if vOut.No == vin.Sequence{
+				script := vin.ScriptSig + vOut.ScriptPubKey
+				stack := svm.NewOperationStack(script)
+				if err := stack.Run();err != nil{
+					utils.BusinessErrorWarp(err.Error())
+				}else{
+					cmp.Transactions = append(cmp.Transactions, ctxMemEntry)
+				}
+			}
+		}
+
+
+
+	}
+
 }
 
 func(cmp *CtxMemPool) PopTx() *CTxMemPoolEntry{

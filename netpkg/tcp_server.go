@@ -23,13 +23,13 @@ type Server interface {
 	Close()
 }
 type TcpServer struct {
-	Address string
-	Port string
-	stopChan chan struct{}
+	Address  string
+	Port     string
+	StopChan chan struct{}
 }
 
 func(ts *TcpServer) Close(){
-	ts.stopChan <- struct{}{}
+	ts.StopChan <- struct{}{}
 }
 
 func(ts *TcpServer) Listen(){
@@ -44,7 +44,7 @@ func(ts *TcpServer) Listen(){
 				case <-quit:
 					ts.Close()
 					return
-				case <- ts.stopChan:
+				case <- ts.StopChan:
 					return
 				}
 			}
@@ -71,7 +71,7 @@ func(ts *TcpServer) Listen(){
 					panic(utils.NetErroWarp(err.Error()))
 				}
 				utils.GO_Func(func() {
-					Handle(conn,ts.stopChan)
+					Handle(conn,ts.StopChan)
 				})
 			}
 		})

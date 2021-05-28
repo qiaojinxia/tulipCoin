@@ -88,7 +88,12 @@ func NewTransaction(publicKey []byte,toWalletAddress []byte,txOuts map[string]Tx
 	txInputs := make([]*TxInput,0,len(txOuts))
 	txOutputs := make([]*TxOutput,0)
 	sum := 0.0
+
 	for txID,txOut := range txOuts{
+		trans ,_ := utils.GetDb().GetTransactionByTxID([]byte(txID))
+		if trans == nil{
+			utils.BusinessErrorWarp("Transaction Can't Find!")
+		}
 		sum += txOut.Value
 		txInputs = append(txInputs, &TxInput{
 			Sequence:   txOut.No,

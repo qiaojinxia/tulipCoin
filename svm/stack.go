@@ -26,7 +26,7 @@ func(s *Stack) PushBytes(data []byte){
 	//data length suport index 65535 size
 	lengeth:= int16(len(data))
 	if lengeth > int16(1 << 8 * MaxBytesInstack){
-		utils.StackError("Max Bytes Size!")
+		utils.StackErrorWarp("Max Bytes Size!")
 	}
 	data = append(data, utils.ToBytes(lengeth)...)
 	s.index += len(data)
@@ -164,4 +164,10 @@ func(s *Stack) PopFloat64() float64{
 	tmp := s.codes[s.index:]
 	s.codes = s.codes[:s.index]
 	return utils.BytesToFloat64(tmp)
+}
+
+func(s *Stack) GetTop() OpData{
+	lengeth := int(utils.BytesToInt16(s.codes[len(s.codes)-MaxBytesInstack:]))
+	tmp := s.codes[len(s.codes)- (lengeth + MaxBytesInstack ):len(s.codes) - MaxBytesInstack ]
+	return tmp
 }
