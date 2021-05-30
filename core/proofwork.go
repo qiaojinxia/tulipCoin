@@ -34,7 +34,7 @@ func(pow *ProofOfWork) prepareData(nonce int64) []byte{
 			pow.block.MRoot,
 			utils.ToBytes(pow.block.Index),
 			utils.ToBytes(pow.block.TimeStamp),
-			utils.ToBytes(pow.block.Version),
+			[]byte(pow.block.Version),
 			utils.ToBytes(config.TargetBits),
 			utils.ToBytes(nonce),
 		},

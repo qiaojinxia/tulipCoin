@@ -88,7 +88,7 @@ func(bc *BlocksChain) AddBlock(block *Block){
 		if err != nil{
 			log.Panic(err)
 		}
-		err = utils.GetDb().StoreTransaction(tx.ID,txSerlalize)
+		err = utils.GetDb().StoreTransaction(tx.TxID,txSerlalize)
 		if err != nil{
 			log.Panic(err)
 		}

@@ -2,6 +2,9 @@ package svm
 
 import (
 	"bytes"
+	"encoding/hex"
+	"errors"
+	"fmt"
 	"main/utils"
 	"strings"
 )
@@ -47,7 +50,7 @@ type OperationStack struct {
 	pc                 int              //now OperationCode index
 }
 
-func NewOperationStack(script string) *OperationStack{
+func NewOperationStack(script string,txHash []byte) *OperationStack{
 	codes := strings.Split(script," ")
 	lovalVariable := make([][]byte,0,len(codes))
 	opCode := make([]*OperationCode,0,len(codes))
@@ -62,7 +65,10 @@ func NewOperationStack(script string) *OperationStack{
 			opCode = append(opCode,opcode)
 		case "OP_CHECKSIG":
 			opcode := &OperationCode{
-				Operation: OP_CHECKSIG}
+				Operation: OP_CHECKSIG,
+				args: [][]byte{
+					txHash,
+				}}
 			opCode = append(opCode,opcode)
 		case "OP_DUP":
 			opcode := &OperationCode{
@@ -71,12 +77,12 @@ func NewOperationStack(script string) *OperationStack{
 		case "":
 			continue
 		default:
-			index := len(lovalVariable)
 			lovalVariable = append(lovalVariable, []byte(code))
+			index := len(lovalVariable)
 			opcode := &OperationCode{
 				Operation: PushBytes,
 				args:      [][]byte{
-					utils.ToBytes(index),
+					utils.ToBytes(int32(index-1)),
 				},
 			}
 			opCode = append(opCode,opcode)
@@ -91,19 +97,48 @@ func NewOperationStack(script string) *OperationStack{
 }
 
 func opHash160(stack *Stack,args [][]byte,localVariableTable [][]byte){
-	d1 := stack.PopBytes()
-
+	d1,err := hex.DecodeString(string(stack.PopBytes()))
+	if err != nil{
+		panic(utils.ConverErrorWarp(err.Error()))
+	}
+	d2 := utils.GeneratePublicKeyHash(d1)
+	d3 := fmt.Sprintf("%x",d2)
+	stack.PushBytes([]byte(d3))
 }
 
 func opEqualverify(stack *Stack,args [][]byte,localVariableTable [][]byte){
 	d1 := stack.PopBytes()
 	d2 := stack.PopBytes()
 	res := bytes.Equal(d1,d2)
-	stack.PushBool(res)
+	if !res {
+		utils.StackErrorWarp("opEqualverify Error!")
+	}
 }
 
 func opChecksig(stack *Stack,args [][]byte,localVariableTable [][]byte){
-
+	dataHash,err := hex.DecodeString(string(args[0]))
+	if err != nil{
+		panic(utils.ConverErrorWarp(err.Error()))
+	}
+	pubKey := stack.PopBytes()
+	signature := stack.PopBytes()
+	bPubKey := make([]byte,len(pubKey))
+	bSignature := make([]byte,len(signature))
+	n,err := hex.Decode(bPubKey,pubKey)
+	bPubKey = bPubKey[:n]
+	if err != nil{
+		panic(utils.ConverErrorWarp(err.Error()))
+	}
+	n,err = hex.Decode(bSignature,signature)
+	bSignature = bSignature[:n]
+	if err != nil{
+		panic(utils.ConverErrorWarp(err.Error()))
+	}
+	if utils.Verify(bSignature,bPubKey,dataHash){
+		stack.PushBool(true)
+		return
+	}
+	stack.PushBool(false)
 }
 
 func opDUP(stack *Stack,args [][]byte,localVariableTable [][]byte){
@@ -112,7 +147,7 @@ func opDUP(stack *Stack,args [][]byte,localVariableTable [][]byte){
 
 func pushBytes(stack *Stack,args [][]byte,localVariableTable [][]byte){
 	for _,arg := range args{
-		dataIndex := utils.BytesToInt64(arg)
+		dataIndex := utils.BytesToInt32(arg)
 		if int(dataIndex) > len(localVariableTable){
 			utils.StackErrorWarp("index overflow")
 		}
@@ -121,7 +156,7 @@ func pushBytes(stack *Stack,args [][]byte,localVariableTable [][]byte){
 }
 
 func storeBytes(stack *Stack,args [][]byte,localVariableTable [][]byte) {
-	dataIndex := utils.BytesToInt64(args[0])
+	dataIndex := utils.BytesToInt32(args[0])
 	data := stack.PopBytes()
 	if int(dataIndex) > len(localVariableTable) {
 		panic("index overflow")
@@ -132,7 +167,7 @@ func storeBytes(stack *Stack,args [][]byte,localVariableTable [][]byte) {
 
 
 func(os *OperationStack) Run() error {
-	for{
+	for os.pc < len(os.Opcode){
 		opCode := os.Opcode[os.pc]
 		switch opCode.Operation {
 		case PushBytes:
@@ -152,5 +187,9 @@ func(os *OperationStack) Run() error {
 		}
 		os.pc ++
 	}
+	if !os.stack.PopBool(){
+		return errors.New("Valid Script Failed!")
+	}
+	return nil
 
 }

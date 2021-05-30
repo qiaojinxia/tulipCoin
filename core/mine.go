@@ -19,5 +19,5 @@ func Mining(walletAddress []byte,privateKey *ecdsa.PrivateKey){
 	block.Hash = blockHash
 	fmt.Printf("We've got a mine . Hash:%x nonce:%d\n",block.Hash,block.Nonce)
 	_BlockChain.AddBlock(block)
-	ShowBlockChainInfo(_BlockChain)
+	//ShowBlockChainInfo(_BlockChain)
 }

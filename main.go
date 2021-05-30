@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"main/core"
 	"main/netpkg"
 	"main/utils"
@@ -14,6 +15,12 @@ import (
  */
 
 func main(){
+
+
+	//aa := fmt.Sprintf("%x",keys.PublicKey)
+	xx := utils.GeneratePublicKeyHash([]byte("304402200fec574bdab69adf378b488671afade0cee88ddac74f27caef5c4183f43265190220330e14b202e3f1134dee1e37a90af3bb9970ea2302223624d71b774aa5c4c91801"))
+	fmt.Printf("xxx %x",xx)
+
 	server := &netpkg.TcpServer{
 		Address:  "127.0.0.1",
 		Port:     "7777",
@@ -22,22 +29,32 @@ func main(){
 	go func() {
 		server.Listen()
 	}()
-	keys := utils.LoadWallet("./wallet/sercurt.key")
-	fmt.Println(string(keys.GetAddress()))
-	ok := utils.IsVaildBitcoinAddress(string(keys.GetAddress()))
-	if !ok{
-		panic("err")
-	}
-	core.Mining(keys.GetAddress(),keys.PrivateKey)
-	fmt.Printf("amount %.6f\n",wallet.GetWalletBalance(keys.PublicKey))
-	bx,_ := wallet.WalletTransfer(keys.PublicKey,keys.PrivateKey,[]byte("1Q1w7NaikzaDgYZKngope6hnMLofok85tj"),2)
-	cli := wallet.WalletClient{}
-	//
-	cli.Listen()
-	//
-	cli.SendMsg(bx)
-	//
-	select {}
+	utils.Try(
+		func() {
+			keys := utils.LoadWallet("./wallet/sercurt.key")
+			fmt.Println(string(keys.GetAddress()))
+			ok := utils.IsVaildBitcoinAddress(string(keys.GetAddress()))
+			if !ok{
+				panic("err")
+			}
+			core.Mining(keys.GetAddress(),keys.PrivateKey)
+			fmt.Printf("amount %.6f\n",wallet.GetWalletBalance(keys.PublicKey))
+			fmt.Printf("Public Key %x\n",keys.PublicKey)
+			bx,err := wallet.WalletTransfer(keys.PublicKey,keys.PrivateKey,[]byte("1Q1w7NaikzaDgYZKngope6hnMLofok85tj"),2)
+			if err != nil{
+				panic(utils.ConverErrorWarp(err.Error()))
+			}
+			cli := wallet.WalletClient{}
+			//
+			cli.Listen()
+			//
+			cli.SendMsg(bx)
+			//
+			select {}
+		}).CatchAll(func(err error) {
+		log.Panicf("Catch Error : %s!" ,utils.ConverToJsonInfo(err))
+	})
+
 	//wallet.GetBalance()
 
 	//bitcoinAddress := keys.GetAddress()

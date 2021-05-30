@@ -14,13 +14,14 @@ import (
 
 func PConvertTransactionBytes(transaction *core.Transaction) ([]byte,error){
 	tx := &protomsg.Transaction{
-		ID:                   transaction.ID,
+		ID:                   transaction.TxID,
 		Vin:                  make([]*protomsg.TxInput,0),
 		Vount:                make([]*protomsg.TxOutput,0),
 	}
 	for _,vi := range transaction.Vin{
 		p_vin := &protomsg.TxInput{
-			Sequence:             int64(vi.Sequence),
+			TxID: 				  vi.TxID,
+			Vout:            	  int64(vi.Vout),
 			PrevTxHash:           vi.PrevTxHash,
 			ScriptSig:            vi.ScriptSig,
 
@@ -49,7 +50,8 @@ func ConvertTransactionBytes(pTranssactions []byte) *core.Transaction{
 	vouts := make([]*core.TxOutput,0,len(pTrans.Vount))
 	for _,pVin := range pTrans.Vin{
 		vin := &core.TxInput{
-			Sequence:   int(pVin.Sequence),
+			Vout:       int(pVin.Vout),
+			TxID: pVin.TxID,
 			PrevTxHash: pVin.PrevTxHash,
 			ScriptSig:  pVin.ScriptSig,
 		}
@@ -65,7 +67,7 @@ func ConvertTransactionBytes(pTranssactions []byte) *core.Transaction{
 		vouts = append(vouts, vout)
 	}
 	trans := &core.Transaction{
-		ID:   pTrans.ID,
+		TxID: pTrans.ID,
 		Vin:  vins,
 		Vout: vouts,
 	}

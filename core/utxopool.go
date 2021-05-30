@@ -37,7 +37,9 @@ type CtxMemPool struct {
 }
 
 func(cmp *CtxMemPool) AddTxToPool(ctxMemEntry *CTxMemPoolEntry){
-	//Verify Transaction
+	//1.Verify Transaction
+
+	//2.Check Lock Script
 	for _,vin := range ctxMemEntry.CTransactionRef.Vin{
 		bTransaction ,err := utils.GetDb().GetTransactionByTxID(vin.PrevTxHash)
 		if err != nil{
@@ -52,9 +54,9 @@ func(cmp *CtxMemPool) AddTxToPool(ctxMemEntry *CTxMemPoolEntry){
 			utils.MarshalErrorWarp(err.Error())
 		}
 		for _,vOut := range  transaction.Vout {
-			if vOut.No == vin.Sequence{
-				script := vin.ScriptSig + vOut.ScriptPubKey
-				stack := svm.NewOperationStack(script)
+			if vOut.No == vin.Vout {
+				script := vin.ScriptSig + " " + vOut.ScriptPubKey
+				stack := svm.NewOperationStack(script,vin.TxID)
 				if err := stack.Run();err != nil{
 					utils.BusinessErrorWarp(err.Error())
 				}else{
@@ -62,9 +64,6 @@ func(cmp *CtxMemPool) AddTxToPool(ctxMemEntry *CTxMemPoolEntry){
 				}
 			}
 		}
-
-
-
 	}
 
 }

@@ -40,7 +40,7 @@ func GetUtxoSpended() map[string][]core.TxInput{
 			continue
 		}
 		for _,vin := range tx.Vin{
-			utxoSpend[string(tx.ID)] = append(utxoSpend[string(tx.ID)], *vin)
+			utxoSpend[string(tx.TxID)] = append(utxoSpend[string(tx.TxID)], *vin)
 		}
 
 	}
@@ -58,16 +58,16 @@ func GetUtxoUnSpend(allUseUtxo map[string][]core.TxInput) map[string][]core.TxOu
 		tx := transIter.Next()
 		for _,vout := range tx.Vout{
 			isuse := false
-			if txVins,ok := allUseUtxo[string(tx.ID)];ok{
+			if txVins,ok := allUseUtxo[string(tx.TxID)];ok{
 				for _,txVin := range txVins{
-					if txVin.Sequence == vout.No {
+					if txVin.Vout == vout.No {
 						isuse = true
 					}
 				}
 
 			}
 			if !isuse {
-				utxoUnSpendTxOut[string(tx.ID)] = append(utxoUnSpendTxOut[string(tx.ID)], *vout)
+				utxoUnSpendTxOut[string(tx.TxID)] = append(utxoUnSpendTxOut[string(tx.TxID)], *vout)
 			}
 		}
 	}

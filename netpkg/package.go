@@ -15,7 +15,7 @@ const HeaderLen = 5
 
 type Msg struct {
 	MagicNum int8 //MagicNum
-	//Sequence int32  //msg Sequence
+	//Vout int32  //msg Vout
 	Len int32 //Data Len maxLen
 	HandleNo int32 //handle protol
 	Body []byte //Body data

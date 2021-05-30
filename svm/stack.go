@@ -75,7 +75,7 @@ func(s *Stack) PushUint64(data uint64) {
 }
 
 func(s *Stack) PushBool(data bool){
-	s.index += 1
+	s.index += 4
 	s.codes = append(s.codes, utils.ToBytes(data)...)
 }
 
@@ -93,6 +93,7 @@ func(s *Stack) PopBytes() OpData{
 	lengeth := int(utils.BytesToInt16(s.codes[len(s.codes)-MaxBytesInstack:]))
 	tmp := s.codes[len(s.codes)- (lengeth + MaxBytesInstack ):len(s.codes) - MaxBytesInstack ]
 	s.codes= s.codes[:len(s.codes)-(lengeth + MaxBytesInstack)]
+	s.index -= lengeth + MaxBytesInstack
 	return tmp
 }
 func(s *Stack) PopInt8() int8{
@@ -100,6 +101,17 @@ func(s *Stack) PopInt8() int8{
 	tmp := s.codes[s.index:]
 	s.codes = s.codes[:s.index]
 	return utils.BytesToInt8(tmp)
+}
+
+func(s *Stack) PopBool() bool{
+	s.index -= 4
+	tmp := s.codes[s.index:]
+	s.codes = s.codes[:s.index]
+	if utils.BytesToUInt8(tmp) == 0{
+		return false
+	}
+	return true
+
 }
 
 func(s *Stack) PopInt16() int16{

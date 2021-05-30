@@ -43,6 +43,10 @@ type StackError struct {
 	BasicError
 }
 
+type ConvertError struct {
+	BasicError
+}
+
 var ErrorsMap = make(map[reflect.Type]int)
 
 func init(){
@@ -50,6 +54,7 @@ func init(){
 	ErrorsMap[reflect.TypeOf(StackErrorWarp(""))] = 200
 	ErrorsMap[reflect.TypeOf(BusinessErrorWarp(""))] = 300
 	ErrorsMap[reflect.TypeOf(MarshalErrorWarp(""))] = 400
+	ErrorsMap[reflect.TypeOf(ConverErrorWarp(""))] = 500
 }
 
 
@@ -63,6 +68,14 @@ func StackErrorWarp(msg string) error{
 		error: msg,
 	}}
 }
+
+
+func ConverErrorWarp(msg string) error{
+	return &ConvertError{BasicError{
+		error: msg,
+	}}
+}
+
 
 func BusinessErrorWarp(msg string) error{
 	return &BusinessError{BasicError{

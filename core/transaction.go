@@ -20,9 +20,9 @@ import (
  */
 
 type Transaction struct {
-	ID []byte
-	Vin []*TxInput
-	Vout []*TxOutput
+	TxID      []byte
+	Vin       []*TxInput
+	Vout      []*TxOutput
 	TimeStamp int64
 
 }
@@ -35,26 +35,27 @@ func(tx *Transaction) SetID(){
 	}
 	data := buffer.Bytes()
 	hash := sha256.Sum256(data)
-	tx.ID = hash[:]
+	tx.TxID = hash[:]
 }
 
 
 func(tx *Transaction) IsCoinbase() bool{
-	if  len(tx.Vin) ==1 && len(tx.Vin[0].PrevTxHash) == 0 && tx.Vin[0].Sequence == -1{
+	if  len(tx.Vin) ==1 && len(tx.Vin[0].PrevTxHash) == 0 && tx.Vin[0].Vout == -1{
 		return true
 	}
 	return false
 }
 
 type TxInput struct {
-	Sequence int
+	TxID       []byte
+	Vout       int
 	PrevTxHash []byte
-	ScriptSig string //签名 和 公钥
+	ScriptSig  string //签名 和 公钥
 }
 
 
 func(ti *TxInput) String() string{
-	return fmt.Sprintf("Sequence:%d , PrevTxHash:%x , ScriptSig:%s \n",ti.Sequence,ti.PrevTxHash,ti.ScriptSig)
+	return fmt.Sprintf("Vout:%d , PrevTxHash:%x , ScriptSig:%s \n",ti.Vout,ti.PrevTxHash,ti.ScriptSig)
 }
 
 //<PubK(B)> OP_DUP OP_HASH160 <PubKHash(B)> OP_EQUALVERIFY OP_CHECKSIG
@@ -76,7 +77,7 @@ func NewCoinbase(toAddress []byte,data string) *Transaction{
 	}
 	publicKeyHash:= fmt.Sprintf("OP_DUP OP_HASH160 %x OP_EQUALVERIFY OP_CHECKSIG ",utils.WalletAddressToPublicKeyHash(toAddress))
 	tx := &Transaction{
-		Vin:  []*TxInput{{PrevTxHash:[]byte{} ,ScriptSig: data,Sequence: -1}},
+		Vin:  []*TxInput{{PrevTxHash:[]byte{} ,ScriptSig: data, Vout: -1}},
 		Vout: []*TxOutput{{Value:config.RewardCoinn,ScriptPubKey: publicKeyHash,No:1}},
 		TimeStamp: time.Now().UnixNano(),
 	}
@@ -96,11 +97,13 @@ func NewTransaction(publicKey []byte,toWalletAddress []byte,txOuts map[string]Tx
 		}
 		sum += txOut.Value
 		txInputs = append(txInputs, &TxInput{
-			Sequence:   txOut.No,
+			Vout:       txOut.No,
 			PrevTxHash: []byte(txID),
 			ScriptSig:  string(publicKey),
 		})
+
 	}
+	fmt.Println("test",fmt.Sprintf("%x",utils.GeneratePublicKeyHash(publicKey)))
 	transferOut := &TxOutput{
 		No:           len(txOutputs),
 		Value:        amount,
@@ -120,8 +123,8 @@ func NewTransaction(publicKey []byte,toWalletAddress []byte,txOuts map[string]Tx
 		return nil,errors.New("Not Enought UTXO Can Transfer!")
 	}
 	tx := &Transaction{
-		ID:   nil,
-		Vin: txInputs,
+		TxID: nil,
+		Vin:  txInputs,
 		Vout: txOutputs,
 	}
 	return tx,nil
@@ -133,15 +136,16 @@ func SignTransaction(transaction *Transaction,privateKey *ecdsa.PrivateKey){
 	}
 	cpTransaction := CopyTX(transaction)
 	for index := range cpTransaction.Vin{
-		bak := cpTransaction.Vin[index].ScriptSig
+		publicKey := cpTransaction.Vin[index].ScriptSig
 		transaction.SetID()
-		sindata := transaction.ID
+		sindata := transaction.TxID
 		r,s,err := ecdsa.Sign(rand.Reader,privateKey,sindata)
 		if err != nil{
 			log.Panic(err)
 		}
 		signature := append(r.Bytes(),s.Bytes()...)
-		transaction.Vin[index].ScriptSig = fmt.Sprintf("%x %x",signature,bak)
+		transaction.Vin[index].TxID = []byte(fmt.Sprintf("%x",sindata))
+		transaction.Vin[index].ScriptSig = fmt.Sprintf("%x %x",signature,publicKey)
 	}
 	transaction.SetID()
 }
@@ -151,9 +155,9 @@ func CopyTX(tarnsaction *Transaction) Transaction{
 	vin := make([]*TxInput,0,len(tarnsaction.Vin))
 	for _,vi := range tarnsaction.Vin{
 		txin := &TxInput{
-			Sequence:      vi.Sequence,
-			PrevTxHash:    vi.PrevTxHash,
-			ScriptSig: 	   vi.ScriptSig,
+			Vout:       vi.Vout,
+			PrevTxHash: vi.PrevTxHash,
+			ScriptSig:  vi.ScriptSig,
 		}
 		vin = append(vin, txin)
 	}

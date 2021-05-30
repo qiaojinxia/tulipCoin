@@ -8,9 +8,10 @@ message Transaction{
 }
 
 message TxInput {
-  int64 Sequence = 1;
-  bytes PrevTxHash = 2;
-  string ScriptSig = 3;//签名 和 公钥
+  int64 Vout = 1;
+  bytes TxID = 2;
+  bytes PrevTxHash = 3;
+  string ScriptSig = 4;//签名 和 公钥
 }
 
 message TxOutput {

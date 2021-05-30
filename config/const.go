@@ -10,7 +10,7 @@ import "math"
 
 const (
 	Version    = "0.0.0.1" //Version of Mine Clinet
-	TargetBits = 7
+	TargetBits = int32(7)
 	MaxNone = math.MaxInt64
 	DbName = "BlockData"
 	BlockHeader = "BH"
