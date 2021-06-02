@@ -24,6 +24,7 @@ type Header struct {
 	MRoot  []byte `json:"root"`
 	Nonce int64 `json:"nonce"`
 	Version string `json:"version"`
+	Diffcult int32 `json:"diffcult"`
 	Hash []byte `json:"hash"`
 }
 
@@ -39,6 +40,7 @@ func NewBlock(index int,prevHash []byte,toAddress []byte,memo string,privateKey 
 			PreviousHash: prevHash,
 			TimeStamp:    time.Now().UnixNano(),
 			Version:      config.Version,
+			Diffcult:	  config.TargetBits,
 		},
 		&Body{
 			Transactions:  []*Transaction{
@@ -47,11 +49,21 @@ func NewBlock(index int,prevHash []byte,toAddress []byte,memo string,privateKey 
 		},
 
 	}
+	//TO get transaction from pool
+	for i:=0;i<10;i++{
+		if trans := GetCtxPool().PopTx();trans == nil{
+			break
+		}else{
+			block.Transactions = append(block.Transactions, trans.CTransactionRef)
+		}
+	}
+	transesID := make([][]byte,0,len(block.Transactions))
 	for _,tx := range block.Transactions{
 		SignTransaction(tx,privateKey)
-		block.MRoot = append(block.MRoot,tx.TxID...)
-		block.MRoot = append(block.MRoot,':')
+		transesID = append(transesID,tx.TxID)
 	}
+	mRoot := NewMerkleTree(transesID)
+	block.MRoot = mRoot.merkleRoot
 	return block
 }
 

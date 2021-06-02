@@ -18,7 +18,6 @@ type MerkleNode struct {
 	hashData []byte
 }
 
-
 func NewMerkleTree(hashData [][]byte) *MerkleTree{
 	var nodes []MerkleNode
 	if len(hashData) % 2 != 0{

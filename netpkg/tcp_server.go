@@ -121,7 +121,7 @@ func Handle(conn net.Conn,stopCh <-chan struct{}){
 							if exist{
 								msgRsp, err := myfunc(se, msg.Body)
 								if err != nil{
-									utils.BusinessErrorWarp(err.Error())
+									panic(utils.BusinessErrorWarp(err.Error()))
 								}
 								conn.Write(msgRsp)
 							}
