@@ -9,7 +9,6 @@ import (
 	"math/big"
 	"sort"
 )
-
 type MerkleTree struct {
 	Root *MerkleNode
 	merkleRoot []byte
@@ -38,7 +37,12 @@ func(mt *MerkleTree) Verify(txID []byte) [][]byte{
 	}
 	return merklePath
 }
-
+func min(x,y int ) int{
+	if x < y{
+		return x
+	}
+	return y
+}
 func binarySearch(content []*MerkleNode,txID []byte) int{
 	left := 0
 	right := len(content)
@@ -62,9 +66,6 @@ func binarySearch(content []*MerkleNode,txID []byte) int{
 
 func NewMerkleTree(hashData [][]byte) *MerkleTree{
 	var nodes []*MerkleNode
-	if len(hashData) % 2 != 0{
-		hashData = append(hashData, hashData[len(hashData)-1])
-	}
 	for _,v := range hashData{
 		node := NewMerkleNode(nil,nil,v)
 		nodes = append(nodes,node)
@@ -77,16 +78,12 @@ func NewMerkleTree(hashData [][]byte) *MerkleTree{
 		b2.SetBytes(nodes[j].hashData)
 		return b1.Cmp(&b2) == -1
 	})
-	for ;len(nodes)>1;{
+	for len(nodes)>1{
 		var tmpNode []*MerkleNode
 		for i:=0;i<len(nodes);i+=2{
-			node := NewMerkleNode(nodes[i],nodes[i+1],nil)
-			nodes[i].prev = node
-			nodes[i+1].prev = node
+			i2 := min(i+1,len(nodes) -1)
+			node := NewMerkleNode(nodes[i],nodes[i2],nil)
 			tmpNode = append(tmpNode, node)
-		}
-		if len(tmpNode) != 1 && len(tmpNode) % 2 != 0{
-			tmpNode = append(tmpNode, tmpNode[len(tmpNode)-1])
 		}
 		nodes = tmpNode
 	}
@@ -112,7 +109,8 @@ func NewMerkleNode(left,right *MerkleNode,data []byte) *MerkleNode{
 			prev:     nil,
 			hashData: hash[:],
 		}
+		left.prev = mnode
+		right.prev = mnode
 	}
 	return mnode
 }
-
