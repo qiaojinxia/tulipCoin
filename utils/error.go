@@ -2,7 +2,7 @@ package utils
 
 import (
 	"encoding/json"
-
+	"github.com/pkg/errors"
 	"reflect"
 )
 
@@ -16,11 +16,12 @@ import (
 
 
 type  BasicError struct {
-	error string
+	msg string
+	error error
 }
 
 func (n *BasicError) Error() string {
-	return n.error
+	return n.error.Error()
 }
 
 func (n *BasicError) RuntimeError() {
@@ -50,42 +51,47 @@ type ConvertError struct {
 var ErrorsMap = make(map[reflect.Type]int)
 
 func init(){
-	ErrorsMap[reflect.TypeOf(NetErroWarp(""))] = 100
-	ErrorsMap[reflect.TypeOf(StackErrorWarp(""))] = 200
-	ErrorsMap[reflect.TypeOf(BusinessErrorWarp(""))] = 300
-	ErrorsMap[reflect.TypeOf(MarshalErrorWarp(""))] = 400
-	ErrorsMap[reflect.TypeOf(ConverErrorWarp(""))] = 500
+	ErrorsMap[reflect.TypeOf(NetErroWarp(nil,""))] = 100
+	ErrorsMap[reflect.TypeOf(StackErrorWarp(nil,""))] = 200
+	ErrorsMap[reflect.TypeOf(BusinessErrorWarp(nil,""))] = 300
+	ErrorsMap[reflect.TypeOf(MarshalErrorWarp(nil,""))] = 400
+	ErrorsMap[reflect.TypeOf(ConverErrorWarp(nil,""))] = 500
 }
 
-
-func MarshalErrorWarp(msg string) error{
+func MarshalErrorWarp(err error,msg string) error{
 	return &MarshalError{BasicError{
-		error: msg,
+		error: errors.WithStack(err) ,
+		msg: msg,
+
 	}}
 }
-func StackErrorWarp(msg string) error{
+func StackErrorWarp(err error,msg string) error{
 	return &StackError{BasicError{
-		error: msg,
+		error: err ,
+		msg: msg,
 	}}
 }
 
 
-func ConverErrorWarp(msg string) error{
+func ConverErrorWarp(err error,msg string) error{
 	return &ConvertError{BasicError{
-		error: msg,
+		error: err ,
+		msg: msg,
 	}}
 }
 
 
-func BusinessErrorWarp(msg string) error{
+func BusinessErrorWarp(err error,msg string) error{
 	return &BusinessError{BasicError{
-		error: msg,
+		error:err,
+		msg: msg,
 	}}
 }
 
-func NetErroWarp(msg string) error{
+func NetErroWarp(err error,msg string) error{
 	return &NetError{BasicError{
-		error: msg,
+		error:err,
+		msg: msg,
 	}}
 }
 
@@ -93,14 +99,19 @@ type ErrroMsg struct {
 	Code int `json:"code"`
 	ErrorType string `json:"error_type"`
 	Msg string `json:"msg"`
+	ErrInfo string `json:"err_info"`
 }
 
 
 func ConverToJsonInfo(err error) string{
+	object := reflect.ValueOf(err)
+	msg := object.Elem().Field(0).Interface()
 	emsg := &ErrroMsg{
 		Code: ErrorsMap[reflect.TypeOf(err)],
 		ErrorType: reflect.TypeOf(err).Elem().Name(),
-		Msg:  err.Error(),
+		Msg: msg.(BasicError).msg,
+		ErrInfo: err.Error(),
+
 	}
 	data,err := json.Marshal(emsg)
 	if err != nil{

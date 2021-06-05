@@ -42,7 +42,7 @@ func main(){
 			fmt.Printf("Public Key %x\n",keys.PublicKey)
 			bx,err := wallet.WalletTransfer(keys.PublicKey,keys.PrivateKey,[]byte("1Q1w7NaikzaDgYZKngope6hnMLofok85tj"),2)
 			if err != nil{
-				panic(utils.ConverErrorWarp(err.Error()))
+				panic(utils.ConverErrorWarp(err,""))
 			}
 			cli := wallet.WalletClient{}
 			//

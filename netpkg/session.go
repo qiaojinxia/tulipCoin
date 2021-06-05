@@ -19,7 +19,7 @@ func(sm *SessionManager) Broadcast(msg []byte){
 	for _,v := range sm.Sessions{
 		_,err := v.conn.Write(msg)
 		if err != nil{
-			panic(utils.NetErroWarp(err.Error()))
+			panic(utils.NetErroWarp(err,""))
 		}
 	}
 }

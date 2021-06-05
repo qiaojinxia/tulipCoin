@@ -15,9 +15,9 @@ const (
 	DbName = "BlockData"
 	BlockHeader = "BH"
 
-	MerkleTree = "MT"
+	BlockTransactionsID = "TXID"
 
-	BlockTransactions = "BT"
+	BlockTransactions = "TX"
 	BlockInfo_Size = "index"
 	TransactionPool= "TxPool"
     CHECKSUM_LENGTH = 4

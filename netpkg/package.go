@@ -2,6 +2,7 @@ package netpkg
 
 import (
 	"bytes"
+	"errors"
 	"main/utils"
 )
 
@@ -40,7 +41,8 @@ func UnPack(data []byte,cacheBuffer *[]byte,msg *Msg) bool{
 		}
 		validMagic := data[0]
 		if validMagic != MagicNum{
-			utils.NetErroWarp("Invalid Data Flow")
+			panic(utils.NetErroWarp(errors.New(""),"Invalid Data Flow"))
+
 		}
 		length = utils.BytesToInt32(data[1:HeaderLen])
 		surPlus := int(length) - (len(data) - HeaderLen)
@@ -56,7 +58,7 @@ func UnPack(data []byte,cacheBuffer *[]byte,msg *Msg) bool{
 	}else{
 		validMagic := (*cacheBuffer)[0]
 		if validMagic != MagicNum{
-			utils.NetErroWarp("Invalid Data Flow")
+			panic(utils.NetErroWarp(errors.New(""),"Invalid Data Flow"))
 		}
 		if len(*cacheBuffer) < HeaderLen{
 			n := len(*cacheBuffer)

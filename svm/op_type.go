@@ -2,6 +2,7 @@ package svm
 
 import (
 	"bytes"
+	"github.com/pkg/errors"
 	"main/utils"
 	"strconv"
 	"unsafe"
@@ -24,7 +25,7 @@ func(od OpData) ConvertToBool() bool{
 	val := *(*string)(unsafe.Pointer(&od))
 	bo,err :=  strconv.ParseBool(val)
 	if err != nil{
-		utils.StackErrorWarp("stackError")
+		panic(utils.StackErrorWarp(errors.New(""),"stackError"))
 	}
 	return bo
 }

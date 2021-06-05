@@ -18,7 +18,7 @@ type WalletClient struct {
 func (wc *WalletClient) SendMsg(msg []byte){
 	_, err := wc.conn.Write(netpkg.Pack(msg,0))
 	if err != nil{
-		utils.NetErroWarp(err.Error())
+		panic(utils.NetErroWarp(err,""))
 	}
 }
 

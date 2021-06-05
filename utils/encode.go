@@ -17,7 +17,7 @@ func ToBytes(n interface{}) []byte {
 	bytesBuffer := bytes.NewBuffer([]byte{})
 	err := binary.Write(bytesBuffer, binary.BigEndian, x)
 	if err != nil{
-		panic(ConverErrorWarp(err.Error()))
+		panic(ConverErrorWarp(err,""))
 	}
 	return bytesBuffer.Bytes()
 }

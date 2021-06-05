@@ -39,15 +39,33 @@ func NewBlockChainDb() (*BlockChainDB,error){
 	}
 	err = mdb.Update(func(tx *bolt.Tx) error {
 		tx.CreateBucket([]byte(config.DbName))
-		tx.CreateBucket([]byte(config.MerkleTree))
 		tx.CreateBucket([]byte(config.BlockHeader))
 		tx.CreateBucket([]byte(config.BlockTransactions))
+		tx.CreateBucket([]byte(config.BlockTransactionsID))
 		return nil
 	})
 	return &BlockChainDB{
 		db:mdb,
 	},nil
 }
+
+func(m *BlockChainDB) StoreTransactionsID(merkleRoot,txData []byte) (err error){
+	err  = m.db.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(config.BlockTransactionsID))
+		return b.Put(merkleRoot, txData)
+	})
+	return
+}
+
+func(m *BlockChainDB) GetTransactionsID(merkleRoot []byte) (tmp []byte,err error){
+	err  = m.db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(config.BlockTransactionsID))
+		tmp = b.Get(merkleRoot)
+		return err
+	})
+	return
+}
+
 
 
 func(m *BlockChainDB) StoreBlockHeight(val []byte) (err error){

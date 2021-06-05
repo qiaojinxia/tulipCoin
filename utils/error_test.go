@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"github.com/pkg/errors"
 	"testing"
 )
 
@@ -11,5 +12,5 @@ import (
  */
 
 func Test_error(t *testing.T) {
-	fmt.Println(ConverToJsonInfo(StackErrorWarp("错误了!")))
+	fmt.Println(ConverToJsonInfo(StackErrorWarp(errors.New("123"),"错误了!")))
 }

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"main/utils"
-	"strings"
 )
 
 /**
@@ -93,7 +92,14 @@ func(bc *BlocksChain) AddBlock(block *Block){
 			log.Panic(err)
 		}
 	}
-
+	tranText,err := json.Marshal(transactionsID)
+	if err != nil{
+		panic(utils.ConverErrorWarp(err,""))
+	}
+	err = utils.GetDb().StoreTransactionsID(block.MRoot,tranText)
+	if err != nil{
+		panic(utils.ConverErrorWarp(err,""))
+	}
 	err = utils.GetDb().StoreBlockHeight(utils.ToBytes(block.Index))
 	if err != nil{
 		log.Panic(err)
@@ -109,18 +115,25 @@ func ShowBlockChainInfo(bc *BlocksChain){
 	fmt.Printf("※※※※※※※※ All Block  Num %d  ※※※※※※※\n",bc.size + 1)
 
 	for _,block := range bc.Blocks{
+		if block.Index == 0{
+			continue
+		}
 		fmt.Printf("Block  Index : %d\n",block.Index)
 		fmt.Printf("Block  Hash : %x\n",block.Hash)
 		fmt.Printf("Block  Nonce : %d\n",block.Nonce)
 		fmt.Printf("Prev Block Hash : %x\n",block.PreviousHash)
-
-		txIDs := strings.Split(string(block.MRoot),":")
+		var txsID [][]byte
+		bTxID,err := utils.GetDb().GetTransactionsID(block.MRoot)
+		if err != nil{
+			panic(utils.MarshalErrorWarp(err,""))
+		}
+		err = json.Unmarshal(bTxID,&txsID)
+		if err != nil{
+			panic(utils.MarshalErrorWarp(err,""))
+		}
 		txs := make([]Transaction,0)
-		for _,txID := range txIDs{
-			if txID == ""{
-				continue
-			}
-			tx := _BlockChain.FindTransactionByTxID([]byte(txID))
+		for _,txID := range txsID{
+			tx := _BlockChain.FindTransactionByTxID(txID)
 			txs = append(txs, *tx)
 		}
 

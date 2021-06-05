@@ -71,7 +71,7 @@ func NewBlock(index int,prevHash []byte,toAddress []byte,memo string,privateKey 
 func CreateGenesisBlock() *Block{
 	return &Block{
 		&Header{
-			Index:        1,
+			Index:        0,
 			PreviousHash: []byte{},
 			TimeStamp:    0,
 			MRoot: []byte(""),

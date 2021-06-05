@@ -52,7 +52,7 @@ func(ts *TcpServer) Listen(){
 		utils.GO_Func(func() {
 			tcpAddr, err := net.ResolveTCPAddr("tcp4", fmt.Sprintf("%s:%s",ts.Address,ts.Port))
 			if err != nil{
-				panic(utils.NetErroWarp(err.Error()))
+				panic(utils.NetErroWarp(err,""))
 			}
 			log.Println(fmt.Sprintf("Listening %s:%s....",ts.Address,ts.Port))
 			listener, err := net.ListenTCP("tcp", tcpAddr)
@@ -63,12 +63,12 @@ func(ts *TcpServer) Listen(){
 				log.Println(fmt.Sprintf("Server Closed %s:%s....",ts.Address,ts.Port))
 			}()
 			if err != nil{
-				panic(utils.NetErroWarp(err.Error()))
+				panic(utils.NetErroWarp(err,""))
 			}
 			for{
 				conn,err := listener.Accept()
 				if err != nil{
-					panic(utils.NetErroWarp(err.Error()))
+					panic(utils.NetErroWarp(err,""))
 				}
 				utils.GO_Func(func() {
 					Handle(conn,ts.StopChan)
@@ -77,8 +77,8 @@ func(ts *TcpServer) Listen(){
 		})
 		time.Sleep(time.Second * 2)
 		utils.Wg.Wait()
-	}).Catch(utils.NetErroWarp(""), func(err error) {
-		log.Panic(utils.ConverToJsonInfo(utils.NetErroWarp(err.Error())))
+	}).Catch(utils.NetErroWarp(nil,""), func(err error) {
+		log.Println(utils.ConverToJsonInfo(err))
 	}).CatchAll(func(err error) {
 		log.Println(err)
 	})
@@ -105,7 +105,7 @@ func Handle(conn net.Conn,stopCh <-chan struct{}){
 					log.Printf("Client %d Offline!",se.ID)
 					return
 				}
-				utils.NetErroWarp(err.Error())
+				panic(utils.NetErroWarp(err,""))
 				return
 			}
 			msg := &Msg{}
@@ -121,7 +121,7 @@ func Handle(conn net.Conn,stopCh <-chan struct{}){
 							if exist{
 								msgRsp, err := myfunc(se, msg.Body)
 								if err != nil{
-									panic(utils.BusinessErrorWarp(err.Error()))
+									panic(utils.BusinessErrorWarp(err,""))
 								}
 								conn.Write(msgRsp)
 							}

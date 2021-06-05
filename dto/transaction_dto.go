@@ -44,7 +44,8 @@ func ConvertTransactionBytes(pTranssactions []byte) *core.Transaction{
 	pTrans := &protomsg.Transaction{}
 	err := proto.Unmarshal(pTranssactions,pTrans)
 	if err != nil{
-		utils.MarshalErrorWarp(err.Error())
+		panic(utils.MarshalErrorWarp(err,""))
+
 	}
 	vins := make([]*core.TxInput,0,len(pTrans.Vin))
 	vouts := make([]*core.TxOutput,0,len(pTrans.Vount))

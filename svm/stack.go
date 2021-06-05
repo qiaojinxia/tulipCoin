@@ -1,6 +1,7 @@
 package svm
 
 import (
+	"github.com/pkg/errors"
 	"main/utils"
 )
 
@@ -26,7 +27,8 @@ func(s *Stack) PushBytes(data []byte){
 	//data length suport index 65535 size
 	lengeth:= int16(len(data))
 	if lengeth > int16(1 << 8 * MaxBytesInstack){
-		utils.StackErrorWarp("Max Bytes Size!")
+		panic(	utils.StackErrorWarp(errors.New(""),"Max Bytes Size!"))
+
 	}
 	data = append(data, utils.ToBytes(lengeth)...)
 	s.index += len(data)

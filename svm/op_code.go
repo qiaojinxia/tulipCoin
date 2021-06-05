@@ -99,7 +99,7 @@ func NewOperationStack(script string,txHash []byte) *OperationStack{
 func opHash160(stack *Stack,args [][]byte,localVariableTable [][]byte){
 	d1,err := hex.DecodeString(string(stack.PopBytes()))
 	if err != nil{
-		panic(utils.ConverErrorWarp(err.Error()))
+		panic(utils.ConverErrorWarp(err,""))
 	}
 	d2 := utils.GeneratePublicKeyHash(d1)
 	d3 := fmt.Sprintf("%x",d2)
@@ -111,14 +111,14 @@ func opEqualverify(stack *Stack,args [][]byte,localVariableTable [][]byte){
 	d2 := stack.PopBytes()
 	res := bytes.Equal(d1,d2)
 	if !res {
-		utils.StackErrorWarp("opEqualverify Error!")
+		panic(utils.StackErrorWarp(errors.New(""),"opEqualverify Error!"))
 	}
 }
 
 func opChecksig(stack *Stack,args [][]byte,localVariableTable [][]byte){
 	dataHash,err := hex.DecodeString(string(args[0]))
 	if err != nil{
-		panic(utils.ConverErrorWarp(err.Error()))
+		panic(utils.ConverErrorWarp(err,""))
 	}
 	pubKey := stack.PopBytes()
 	signature := stack.PopBytes()
@@ -127,12 +127,12 @@ func opChecksig(stack *Stack,args [][]byte,localVariableTable [][]byte){
 	n,err := hex.Decode(bPubKey,pubKey)
 	bPubKey = bPubKey[:n]
 	if err != nil{
-		panic(utils.ConverErrorWarp(err.Error()))
+		panic(utils.ConverErrorWarp(err,""))
 	}
 	n,err = hex.Decode(bSignature,signature)
 	bSignature = bSignature[:n]
 	if err != nil{
-		panic(utils.ConverErrorWarp(err.Error()))
+		panic(utils.ConverErrorWarp(err,""))
 	}
 	if utils.Verify(bSignature,bPubKey,dataHash){
 		stack.PushBool(true)
@@ -149,7 +149,7 @@ func pushBytes(stack *Stack,args [][]byte,localVariableTable [][]byte){
 	for _,arg := range args{
 		dataIndex := utils.BytesToInt32(arg)
 		if int(dataIndex) > len(localVariableTable){
-			utils.StackErrorWarp("index overflow")
+			panic(utils.StackErrorWarp(errors.New(""),"localVariable index overflow"))
 		}
 		stack.PushBytes(localVariableTable[dataIndex])
 	}
