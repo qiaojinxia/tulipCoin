@@ -37,7 +37,7 @@ type CtxMemPool struct {
 }
 
 func(cmp *CtxMemPool) AddTxToPool(ctxMemEntry *CTxMemPoolEntry){
-	//1.Verify Transaction
+	//1.GenerateMerkleProof Transaction
 
 	//2.Check Lock Script
 	for _,vin := range ctxMemEntry.CTransactionRef.Vin{

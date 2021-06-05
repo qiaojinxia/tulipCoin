@@ -39,6 +39,7 @@ func NewBlockChainDb() (*BlockChainDB,error){
 	}
 	err = mdb.Update(func(tx *bolt.Tx) error {
 		tx.CreateBucket([]byte(config.DbName))
+		tx.CreateBucket([]byte(config.MerkleTree))
 		tx.CreateBucket([]byte(config.BlockHeader))
 		tx.CreateBucket([]byte(config.BlockTransactions))
 		return nil

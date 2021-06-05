@@ -38,7 +38,6 @@ func init(){
 	if err != nil{
 		panic(err)
 	}
-
 	for _,blockSerialize := range res{
 		block := &Block{}
 		err := json.Unmarshal(blockSerialize,block)
@@ -47,7 +46,6 @@ func init(){
 		}
 		_BlockChain.Blocks[block.Index] = block
 	}
-
 	fmt.Println(res)
 }
 
@@ -83,8 +81,10 @@ func(bc *BlocksChain) AddBlock(block *Block){
 	if err != nil{
 		log.Panic(err)
 	}
+	transactionsID := make([][]byte,0,len(block.Transactions))
 	for _,tx := range block.Transactions{
 		txSerlalize,err := json.Marshal(tx)
+		transactionsID = append(transactionsID, tx.TxID)
 		if err != nil{
 			log.Panic(err)
 		}
@@ -93,6 +93,7 @@ func(bc *BlocksChain) AddBlock(block *Block){
 			log.Panic(err)
 		}
 	}
+
 	err = utils.GetDb().StoreBlockHeight(utils.ToBytes(block.Index))
 	if err != nil{
 		log.Panic(err)

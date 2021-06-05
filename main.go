@@ -59,7 +59,7 @@ func main(){
 
 	//bitcoinAddress := keys.GetAddress()
 	//fmt.Println("TulipCoin Address:", string(bitcoinAddress))
-	//fmt.Printf("Verify TulipCoin Address:%v\n", wallet.IsVaildBitcoinAddress(string(bitcoinAddress)))
+	//fmt.Printf("GenerateMerkleProof TulipCoin Address:%v\n", wallet.IsVaildBitcoinAddress(string(bitcoinAddress)))
 	//fmt.Printf("%s\n",keys.GetPrivateKey())
 	////core.Mining()
 	//dax ,_ := keys.PrivateKey.Sign(rand.Reader,[]byte("xxxx"),nil)

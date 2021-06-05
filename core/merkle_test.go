@@ -17,12 +17,12 @@ func Test_MerkleTree(t *testing.T) {
 		c3[:],
 		c4[:],
 	})
-	for _,v := range tree.Verify(c3[:]){
-		fmt.Printf("%x\n",v)
-	}
+	proof := tree.GenerateMerkleProof(tree.leaves[2].content)
+	ok := tree.VerifyMerklet(tree.merkleRoot,c4[:],proof)
+	fmt.Println(ok)
 	fmt.Printf("Merkle Root %x\n",tree.merkleRoot)
 
-	//fmt.Printf("%x\n",tree.Root.left.left.hashData)
-	//fmt.Printf("%x\n",tree.Root.left.right.hashData)
-	//fmt.Printf("%x\n",tree.Root.hashData)
+	//fmt.Printf("%x\n",tree.Root.left.left.content)
+	//fmt.Printf("%x\n",tree.Root.left.right.content)
+	//fmt.Printf("%x\n",tree.Root.content)
 }

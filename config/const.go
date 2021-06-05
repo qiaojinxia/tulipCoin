@@ -14,6 +14,9 @@ const (
 	MaxNone = math.MaxInt64
 	DbName = "BlockData"
 	BlockHeader = "BH"
+
+	MerkleTree = "MT"
+
 	BlockTransactions = "BT"
 	BlockInfo_Size = "index"
 	TransactionPool= "TxPool"
