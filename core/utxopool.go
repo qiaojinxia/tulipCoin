@@ -37,9 +37,7 @@ type CtxMemPool struct {
 }
 
 func(cmp *CtxMemPool) AddTxToPool(ctxMemEntry *CTxMemPoolEntry){
-	//1.GenerateMerkleProof Transaction
-
-	//2.Check Lock Script
+	// Check Lock Script
 	for _,vin := range ctxMemEntry.CTransactionRef.Vin{
 		bTransaction ,err := utils.GetDb().GetTransactionByTxID(vin.PrevTxHash)
 		if err != nil{
