@@ -22,7 +22,7 @@ type ProofOfWork struct {
 
 func NewProofOfWork(b *Block) *ProofOfWork{
 	targrt := big.NewInt(1)
-	targrt.Lsh(targrt,uint(256-config.TargetBits))
+	targrt.Lsh(targrt,uint(256-b.Diffcult))
 	pow := &ProofOfWork{b,targrt}
 	return pow
 }
@@ -35,7 +35,7 @@ func(pow *ProofOfWork) prepareData(nonce int64) []byte{
 			utils.ToBytes(pow.block.Index),
 			utils.ToBytes(pow.block.TimeStamp),
 			[]byte(pow.block.Version),
-			utils.ToBytes(config.TargetBits),
+			utils.ToBytes(pow.block.Diffcult),
 			utils.ToBytes(nonce),
 		},
 		[]byte{},

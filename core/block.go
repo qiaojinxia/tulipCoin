@@ -2,7 +2,10 @@ package core
 
 import (
 	"crypto/ecdsa"
+	"encoding/json"
+	"fmt"
 	"main/config"
+	"main/utils"
 	"time"
 )
 
@@ -15,6 +18,42 @@ type Block struct {
 	*Header
 	*Body `json:"-"`
 }
+
+func GetTargetBit() int32{
+	lastBlockIndex,err:= utils.GetDb().GetBlockHeight()
+	if lastBlockIndex == 0{
+		return config.TargetBits
+	}
+	bLastBlock,err := utils.GetDb().GetBlock(int64(lastBlockIndex))
+	if err != nil{
+		panic(utils.DataBaseErrorWarp(err,""))
+	}
+	lastBlock := &Block{}
+	err = json.Unmarshal(bLastBlock,lastBlock)
+	if err != nil{
+		panic(utils.DataBaseErrorWarp(err,""))
+	}
+	if lastBlockIndex % config.NInterval != 0{
+		return lastBlock.Diffcult
+	}
+	firstBlock := &Block{}
+	firstIndex := lastBlock.Index - config.NInterval
+	bFirstBlock,err := utils.GetDb().GetBlock(firstIndex)
+	err = json.Unmarshal(bFirstBlock,firstBlock)
+
+	min := lastBlock.Diffcult / 2
+	max := lastBlock.Diffcult * 2
+
+	realSpendTime := (lastBlock.TimeStamp - firstBlock.TimeStamp) / 1e3
+	TargetBits := lastBlock.Diffcult * int32(realSpendTime/config.NTargetTimespan)
+	if max > TargetBits{
+		return max
+	}else if TargetBits < min{
+		return min
+	}
+	return TargetBits
+}
+
 
 type Header struct {
 	Index int64 `json:"index"`
@@ -32,15 +71,17 @@ type Body struct {
 	Transactions []*Transaction `json:"transactions"`
 }
 
+
+
 func NewBlock(index int,prevHash []byte,toAddress []byte,memo string,privateKey *ecdsa.PrivateKey) *Block{
 	baseCoin := NewCoinbase(toAddress,memo)
 	block := &Block{
 		&Header{
 			Index:        int64(index),
 			PreviousHash: prevHash,
-			TimeStamp:    time.Now().UnixNano(),
+			TimeStamp:    time.Now().UnixNano()/ 1e6,
 			Version:      config.Version,
-			Diffcult:	  config.TargetBits,
+			Diffcult:	  GetTargetBit(),
 		},
 		&Body{
 			Transactions:  []*Transaction{
@@ -63,7 +104,7 @@ func NewBlock(index int,prevHash []byte,toAddress []byte,memo string,privateKey 
 		transesID = append(transesID,tx.TxID)
 	}
 	mRoot := NewMerkleTree(transesID)
-	block.MRoot = mRoot.merkleRoot
+	block.MRoot = []byte(fmt.Sprintf("%x",mRoot.merkleRoot))
 	return block
 }
 
@@ -73,7 +114,7 @@ func CreateGenesisBlock() *Block{
 		&Header{
 			Index:        0,
 			PreviousHash: []byte{},
-			TimeStamp:    0,
+			TimeStamp:    time.Now().UnixNano()/ 1e6,
 			MRoot: []byte(""),
 			Hash:         []byte(""),
 			Version:      config.Version,

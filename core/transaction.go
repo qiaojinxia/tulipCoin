@@ -79,7 +79,7 @@ func NewCoinbase(toAddress []byte,data string) *Transaction{
 	tx := &Transaction{
 		Vin:  []*TxInput{{PrevTxHash:[]byte{} ,ScriptSig: data, Vout: -1}},
 		Vout: []*TxOutput{{Value:config.RewardCoinn,ScriptPubKey: publicKeyHash,No:1}},
-		TimeStamp: time.Now().UnixNano(),
+		TimeStamp: time.Now().UnixNano() /1e6,
 	}
 	tx.SetID()
 	return tx

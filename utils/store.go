@@ -76,12 +76,22 @@ func(m *BlockChainDB) StoreBlockHeight(val []byte) (err error){
 	return
 }
 
-func(m *BlockChainDB) GetBlockSize() (index int,err error){
+func(m *BlockChainDB) GetBlockHeight() (index int,err error){
 	err  = m.db.View(func(tx *bolt.Tx) error {
 	b := tx.Bucket([]byte(config.BlockHeader))
 	tmp := b.Get([]byte(config.BlockInfo_Size))
 	index = int(BytesToInt64(tmp))
 	return err
+	})
+	return
+}
+
+func (m *BlockChainDB) GetBlock(blockIndex int64)  (res []byte,err error){
+	err = m.db.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(config.DbName))
+		bIndex := fmt.Sprintf("%d", blockIndex)
+		res = b.Get([]byte(bIndex))
+		return nil
 	})
 	return
 }

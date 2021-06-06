@@ -36,6 +36,11 @@ type BusinessError struct {
 	BasicError
 }
 
+type DataBaseError struct {
+	BasicError
+}
+
+
 type MarshalError struct {
 	BasicError
 }
@@ -87,6 +92,14 @@ func BusinessErrorWarp(err error,msg string) error{
 		msg: msg,
 	}}
 }
+
+func DataBaseErrorWarp(err error,msg string) error{
+	return &DataBaseError{BasicError{
+		error:err,
+		msg: msg,
+	}}
+}
+
 
 func NetErroWarp(err error,msg string) error{
 	return &NetError{BasicError{

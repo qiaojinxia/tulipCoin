@@ -23,7 +23,7 @@ type BlocksChain struct {
 var _BlockChain *BlocksChain
 
 func init(){
-	index,err := utils.GetDb().GetBlockSize()
+	index,err := utils.GetDb().GetBlockHeight()
 	if err != nil{
 		panic(err)
 	}

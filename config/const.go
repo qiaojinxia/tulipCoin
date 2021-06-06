@@ -1,6 +1,8 @@
 package config
 
-import "math"
+import (
+	"math"
+)
 
 /**
  * Created by @CaomaoBoy on 2021/5/1.
@@ -10,13 +12,16 @@ import "math"
 
 const (
 	Version    = "0.0.0.1" //Version of Mine Clinet
-	TargetBits = int32(7)
+	TargetBits = int32(12)
 	MaxNone = math.MaxInt64
 	DbName = "BlockData"
 	BlockHeader = "BH"
 
-	BlockTransactionsID = "TXID"
+	NTargetTimespan = 14 * 24 * 60 * 60
+	NTargetSpacing = 10 * 60
+	NInterval = NTargetTimespan / NTargetSpacing
 
+	BlockTransactionsID = "TXID"
 	BlockTransactions = "TX"
 	BlockInfo_Size = "index"
 	TransactionPool= "TxPool"
@@ -24,3 +29,4 @@ const (
 
 	RewardCoinn = 7
 )
+
