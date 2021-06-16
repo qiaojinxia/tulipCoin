@@ -2,7 +2,7 @@ syntax = "proto3";
 package protomsg;
 
 message Transaction{
-  bytes ID = 1;
+   bytes ID = 1;
    repeated TxInput Vin= 2;
    repeated TxOutput Vount= 3;
 }

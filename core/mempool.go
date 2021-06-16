@@ -20,7 +20,6 @@ func GetCtxPool() *CtxMemPool {
 		},
 	)
 	return CtxPool
-
 }
 
 type CTxMemPoolEntry struct {

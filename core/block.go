@@ -2,10 +2,8 @@ package core
 
 import (
 	"crypto/ecdsa"
-	"encoding/json"
 	"fmt"
 	"main/config"
-	"main/utils"
 	"time"
 )
 
@@ -19,42 +17,11 @@ type Block struct {
 	*Body `json:"-"`
 }
 
-func GetTargetBit() int32{
-	lastBlockIndex,err:= utils.GetDb().GetBlockHeight()
-	if lastBlockIndex == 0{
-		return config.TargetBits
-	}
-	bLastBlock,err := utils.GetDb().GetBlock(int64(lastBlockIndex))
-	if err != nil{
-		panic(utils.DataBaseErrorWarp(err,""))
-	}
-	lastBlock := &Block{}
-	err = json.Unmarshal(bLastBlock,lastBlock)
-	if err != nil{
-		panic(utils.DataBaseErrorWarp(err,""))
-	}
-	if lastBlockIndex % config.NInterval != 0{
-		return lastBlock.Diffcult
-	}
-	firstBlock := &Block{}
-	firstIndex := lastBlock.Index - config.NInterval
-	bFirstBlock,err := utils.GetDb().GetBlock(firstIndex)
-	err = json.Unmarshal(bFirstBlock,firstBlock)
 
-	min := lastBlock.Diffcult / 2
-	max := lastBlock.Diffcult * 2
-
-	realSpendTime := (lastBlock.TimeStamp - firstBlock.TimeStamp) / 1e3
-	TargetBits := lastBlock.Diffcult * int32(realSpendTime/config.NTargetTimespan)
-	if max > TargetBits{
-		return max
-	}else if TargetBits < min{
-		return min
-	}
-	return TargetBits
+func (b *Block) String() string{
+	return fmt.Sprintf("Block  Index : %d\n Block  Hash : %x\n Block  Nonce : %d\n Prev Block Hash : %x\n Diffcult : %x\n",
+		b.Index,b.Hash,b.Nonce,b.PreviousHash,b.Diffcult)
 }
-
-
 type Header struct {
 	Index int64 `json:"index"`
 	PreviousHash []byte `json:"previous_hash"`

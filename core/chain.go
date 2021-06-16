@@ -118,10 +118,7 @@ func ShowBlockChainInfo(bc *BlocksChain){
 		if block.Index == 0{
 			continue
 		}
-		fmt.Printf("Block  Index : %d\n",block.Index)
-		fmt.Printf("Block  Hash : %x\n",block.Hash)
-		fmt.Printf("Block  Nonce : %d\n",block.Nonce)
-		fmt.Printf("Prev Block Hash : %x\n",block.PreviousHash)
+
 		var txsID [][]byte
 		bTxID,err := utils.GetDb().GetTransactionsID(block.MRoot)
 		if err != nil{

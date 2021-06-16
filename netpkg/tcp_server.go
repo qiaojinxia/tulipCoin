@@ -108,6 +108,8 @@ func Handle(conn net.Conn,stopCh <-chan struct{}){
 				panic(utils.NetErroWarp(err,""))
 				return
 			}
+			//First connection verification
+
 			msg := &Msg{}
 			for {
 				ok := UnPack(buff[:rlen],&cacaheBuffer,msg)
@@ -115,9 +117,14 @@ func Handle(conn net.Conn,stopCh <-chan struct{}){
 					break
 				}
 			}
+			func() {
+				//msg.Body
+
+			}()
+
 			utils.GO_Func(
 					func() {
-							myfunc,exist := HandlerFunc[int(msg.HandleNo)]
+							myfunc,exist := ServerHandlerFunc[int(msg.HandleNo)]
 							if exist{
 								msgRsp, err := myfunc(se, msg.Body)
 								if err != nil{

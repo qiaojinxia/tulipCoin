@@ -1,0 +1,21 @@
+syntax = "proto3";
+package protomsg;
+
+/**
+ * Created by @CaomaoBoy on 2021/6/16.
+ *  email:<115882934@qq.com>
+ */
+
+message ConnVerifyMsg {
+	//Information about program version number and block number.
+	//It is used to exchange information when the first connection is established between nodes
+	bytes Version = 1;
+	bytes Addr  = 2;
+	int32 BlockHeight = 3;
+	int32 TargetDiffcult = 4;
+	enum NodeType {
+		FullClient = 0;
+		SPVClient = 1;
+	}
+	NodeType Node = 5;
+}

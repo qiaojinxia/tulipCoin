@@ -1,8 +1,10 @@
 package netpkg
 
 import (
+	"fmt"
 	"main/core"
 	"main/dto"
+	"main/utils"
 )
 
 /**
@@ -11,14 +13,46 @@ import (
  */
 
 
-var HandlerFunc = make(map[int]func(session *Session,data []byte) ([]byte,error))
+
+const (
+	ReceiveTransaction int = 0
+	ConnectionVerify int = 1
+	GetHeaders int = 2
+	HeartBeat int = 3
+	NodeOnline int = 4
+)
+
+var ClientHandlerFunc = make(map[int]func(session *Session,data []byte) ([]byte,error))
+var ServerHandlerFunc = make(map[int]func(session *Session,data []byte) ([]byte,error))
 
 func init(){
-	HandlerFunc[0] = func(session *Session,data []byte) ([]byte, error) {
+
+	ClientHandlerFunc[ReceiveTransaction] = func(session *Session,data []byte) ([]byte, error) {
 		transaction := dto.ConvertTransactionBytes(data)
 		ctp := core.GetCtxPool()
 		tmpt := &core.CTxMemPoolEntry{CTransactionRef: transaction}
 		ctp.AddTxToPool(tmpt)
 		return []byte("handler Success!"),nil
 	}
+
+	ClientHandlerFunc[ConnectionVerify] = func(session *Session,data []byte) ([]byte, error) {
+		transaction := dto.ConvertTransactionBytes(data)
+		ctp := core.GetCtxPool()
+		tmpt := &core.CTxMemPoolEntry{CTransactionRef: transaction}
+		ctp.AddTxToPool(tmpt)
+		return []byte("handler Success!"),nil
+	}
+
+	ClientHandlerFunc[NodeOnline] = func(session *Session,data []byte) ([]byte, error) {
+		//Sync Block
+		blockHearders,err := utils.GetDb().IterAllBlock()
+		if err != nil{
+			panic(utils.BusinessErrorWarp(err,""))
+		}
+		fmt.Println(blockHearders)
+		return []byte("handler Success!"),nil
+	}
+
+
 }
+
